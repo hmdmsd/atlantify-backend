@@ -8,6 +8,7 @@ export class SongModel extends Model {
   public duration!: number;
   public path!: string;
   public uploadedBy!: string;
+  public size!: number; // Add the size property
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -39,6 +40,11 @@ SongModel.init(
     uploadedBy: {
       type: DataTypes.UUID,
       allowNull: false,
+    },
+    size: {
+      type: DataTypes.INTEGER, // Store size in bytes
+      allowNull: false,
+      defaultValue: 0,
     },
   },
   {

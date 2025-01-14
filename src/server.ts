@@ -24,10 +24,17 @@ const server = http.createServer(app);
       logger.info(`Server running at http://localhost:${PORT}`);
     });
   } catch (error) {
-    logger.error('Failed to start server or connect to database:', {
-      message: error.message,
-      stack: error.stack,
-    });
+    if (error instanceof Error) {
+      // Narrow error type
+      logger.error('Failed to start server or connect to database:', {
+        message: error.message,
+        stack: error.stack,
+      });
+    } else {
+      logger.error('Failed to start server or connect to database:', {
+        message: 'Unknown error occurred.',
+      });
+    }
     process.exit(1);
   }
 })();

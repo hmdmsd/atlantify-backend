@@ -24,7 +24,8 @@ export const quotaMiddleware = async (
       where: { uploadedBy: userId },
     });
     const totalSizeMB =
-      userSongs.reduce((sum, song) => sum + song.size, 0) / (1024 * 1024);
+      userSongs.reduce((sum, song) => sum + (song.size || 0), 0) /
+      (1024 * 1024);
 
     if (totalSizeMB >= MAX_STORAGE_LIMIT_MB) {
       res.status(403).json({
