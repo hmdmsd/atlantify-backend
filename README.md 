@@ -1,0 +1,140 @@
+# **Atlantify Backend**
+
+The **Atlantify Backend** is a RESTful API built with **Node.js**, **TypeScript**, **Express**, and **SQLite**. It provides endpoints for authentication, managing music suggestions, handling song uploads, and managing a radio queue. This backend is designed to integrate seamlessly with the Atlantify frontend.
+
+---
+
+## **Features**
+
+- User authentication and JWT-based authorization.
+- Song suggestion system with voting functionality.
+- Radio queue management.
+- Song upload and metadata management using SQLite.
+- WebSocket integration for real-time updates (optional).
+
+---
+
+## **Technologies**
+
+- **Node.js**: Backend runtime environment.
+- **Express**: Web framework for building APIs.
+- **TypeScript**: Strongly typed JavaScript for scalable development.
+- **SQLite**: Lightweight database for data storage.
+- **Sequelize**: ORM for database management.
+- **AWS SDK**: Integration for S3-compatible storage.
+- **dotenv**: Manage environment variables.
+
+---
+
+## **Installation**
+
+### **Prerequisites**
+- **Node.js** (v16+)
+- **npm** or **yarn**
+
+### **Steps**
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/atlantify-backend.git
+   cd atlantify-backend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   - Create a `.env` file in the root directory.
+   - Add the following configuration:
+     ```env
+     PORT=4000
+     DB_NAME=atlantify
+     DB_USER=root
+     DB_PASSWORD=
+     DB_HOST=localhost
+     DB_PORT=3306
+     JWT_SECRET=your_jwt_secret
+     S3_BUCKET_NAME=your_bucket_name
+     S3_REGION=your_region
+     S3_ENDPOINT=your_endpoint
+     S3_ACCESS_KEY=your_access_key
+     S3_SECRET_KEY=your_secret_key
+     ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## **Running the Application**
+
+### **Development Mode**
+Starts the server with live reload:
+```bash
+npm run dev
+```
+
+### **Production Mode**
+Builds the app and starts the production server:
+```bash
+npm run build
+npm run start
+```
+
+---
+
+## **API Endpoints**
+
+### **Auth**
+- `POST /api/auth/register`: Register a new user.
+- `POST /api/auth/login`: Authenticate a user.
+- `POST /api/auth/refresh`: Refresh the JWT token.
+
+### **MusicBox**
+- `GET /api/musicbox/suggestions`: Retrieve song suggestions.
+- `POST /api/musicbox/suggestions`: Add a song suggestion.
+- `POST /api/musicbox/suggestions/:id/vote`: Vote on a suggestion.
+
+### **Radio**
+- `GET /api/radio/queue`: Retrieve the current queue.
+- `POST /api/radio/queue`: Add a song to the queue.
+- `GET /api/radio/current`: Retrieve the currently playing song.
+
+### **Songs**
+- `GET /api/songs`: List all songs.
+- `POST /api/songs/upload`: Upload a new song.
+- `GET /api/songs/:id`: Retrieve song details.
+
+---
+
+## **Postman Collection**
+
+Import the provided Postman collection for testing the API endpoints. [Download Postman Collection](./Atlantify.postman_collection.json)
+
+---
+
+## **Database Configuration**
+
+The backend uses **SQLite** for development. The database file is created automatically in the root directory (`database.sqlite`) when the server starts. To explore the database, use tools like [DB Browser for SQLite](https://sqlitebrowser.org/).
+
+---
+
+## **Development**
+
+### **Scripts**
+- `npm run dev`: Start the server in development mode with live reload.
+- `npm run build`: Build the TypeScript files into JavaScript.
+- `npm run start`: Start the production server.
+- `npm run lint`: Lint the codebase using ESLint.
+- `npm run format`: Format the codebase using Prettier.
+- `npm run test`: Run unit tests with Jest.
+
+---
+
+## **License**
+
+This project is licensed under the MIT License.
+
