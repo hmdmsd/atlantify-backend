@@ -1,0 +1,15 @@
+2025-01-14T21:32:21.550Z [INFO]: Express app configured.
+2025-01-14T21:32:21.583Z [ERROR]: Failed to start server or connect to database:
+2025-01-14T21:33:10.895Z [INFO]: Express app configured.
+2025-01-14T21:33:10.928Z [ERROR]: Failed to start server or connect to database:
+2025-01-14T21:35:22.674Z [INFO]: Express app configured.
+2025-01-14T21:35:22.710Z [ERROR]: Failed to start server or connect to database:
+2025-01-14T21:35:57.651Z [INFO]: Express app configured.
+2025-01-14T21:36:01.244Z [INFO]: Express app configured.
+2025-01-14T21:36:01.274Z [ERROR]: Failed to start server or connect to database:
+2025-01-14T21:36:42.554Z [INFO]: Express app configured.
+2025-01-14T21:36:42.590Z [ERROR]: Failed to start server or connect to database:
+2025-01-14T21:38:30.802Z [INFO]: Express app configured.
+2025-01-14T21:38:30.828Z [INFO]: SQLite database connected successfully.
+2025-01-14T21:38:30.859Z [INFO]: Database synced.
+2025-01-14T21:38:30.860Z [INFO]: Server running at http://localhost:4000
