@@ -1,6 +1,18 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth.service';
 
+declare module 'express' {
+  interface Request {
+    user?: {
+      id: string;
+      username: string;
+      email: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  }
+}
+
 const authService = new AuthService();
 
 export class AuthController {
@@ -101,6 +113,43 @@ export class AuthController {
       res
         .status(500)
         .json({ success: false, message: 'Internal server error.' });
+    }
+  }
+
+  /**
+   * Get current authenticated user details
+   * Requires valid JWT token in the Authorization header
+   */
+  async me(req: Request, res: Response): Promise<void> {
+    try {
+      // The user should be attached to the request by the auth middleware
+      const user = req.user;
+
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          message: 'Unauthorized access.',
+        });
+        return;
+      }
+
+      // Return user data without sensitive information
+      res.status(200).json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+      });
+    } catch (error) {
+      console.error('Get user error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error.',
+      });
     }
   }
 
