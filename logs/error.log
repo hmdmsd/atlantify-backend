@@ -4,3 +4,16 @@
 2025-01-14T21:35:57.684Z [ERROR]: Failed to start server or connect to database:
 2025-01-14T21:36:01.274Z [ERROR]: Failed to start server or connect to database:
 2025-01-14T21:36:42.590Z [ERROR]: Failed to start server or connect to database:
+2025-01-15T20:45:15.402Z [ERROR]: Error uploading song: get_audio_duration_1.default.fromFile is not a function
+2025-01-15T20:47:28.811Z [ERROR]: Error uploading song: get_audio_duration_1.default.fromFile is not a function
+2025-01-15T20:47:46.223Z [ERROR]: Error uploading song: get_audio_duration_1.default.fromFile is not a function
+2025-01-15T20:49:33.623Z [ERROR]: Error uploading song: mm.parseFile is not a function
+2025-01-15T21:08:49.136Z [ERROR]: Error adding to queue: SQLITE_BUSY: database is locked
+2025-01-15T21:08:55.827Z [ERROR]: Error adding to queue: SQLITE_BUSY: database is locked
+2025-01-15T21:09:02.700Z [ERROR]: Error adding to queue: SQLITE_BUSY: database is locked
+2025-01-15T21:11:29.918Z [ERROR]: Error adding to queue: SQLITE_BUSY: database is locked
+2025-01-15T21:12:08.152Z [ERROR]: Error adding to queue: SQLITE_BUSY: database is locked
+2025-01-15T21:12:59.819Z [ERROR]: Error adding to queue: SQLITE_BUSY: database is locked
+2025-01-15T21:13:30.652Z [ERROR]: Error adding to queue: SQLITE_BUSY: database is locked
+2025-01-15T21:27:05.069Z [ERROR]: Error retrieving songs: Invalid value { '$like': '%%' }
+2025-01-15T21:30:42.740Z [ERROR]: Error adding to queue: SQLITE_BUSY: database is locked

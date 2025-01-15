@@ -5,11 +5,10 @@ export class SongModel extends Model {
   public id!: string;
   public title!: string;
   public artist!: string;
-  public duration!: number;
   public path!: string;
+  public size!: number;
+  public duration!: number;
   public uploadedBy!: string;
-  public size!: number; // Add the size property
-
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -29,22 +28,33 @@ SongModel.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    duration: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     path: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
+    },
+    size: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        min: 0,
+      },
+    },
+    duration: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      validate: {
+        min: 0,
+      },
     },
     uploadedBy: {
       type: DataTypes.UUID,
       allowNull: false,
-    },
-    size: {
-      type: DataTypes.INTEGER, // Store size in bytes
-      allowNull: false,
-      defaultValue: 0,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
     },
   },
   {

@@ -1,62 +1,58 @@
 import { SongModel } from '../models/song.model';
-import { S3Service } from './s3.service';
+import logger from '../utils/logger';
 
-const s3Service = new S3Service();
+interface CreateSongDto {
+  title: string;
+  artist: string;
+  path: string;
+  size: number;
+  duration: number;
+  uploadedBy: string;
+}
 
 export class SongsService {
-  /**
-   * Retrieves all songs.
-   */
   async listSongs(): Promise<SongModel[]> {
-    return SongModel.findAll();
+    try {
+      return await SongModel.findAll({
+        order: [['createdAt', 'DESC']],
+      });
+    } catch (error) {
+      logger.error('Error listing songs:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Uploads a song to S3 and stores metadata in the database.
-   * @param title - Title of the song.
-   * @param artist - Artist of the song.
-   * @param filePath - Local path to the song file.
-   * @param size - Size of the song file.
-   * @param uploadedBy - ID of the user uploading the song.
-   * @returns The uploaded song metadata.
-   */
-  async uploadSong({
-    title,
-    artist,
-    filePath,
-    size,
-    uploadedBy,
-  }: {
-    title: string;
-    artist: string;
-    filePath: string;
-    size: number;
-    uploadedBy: string;
-  }): Promise<SongModel> {
-    const s3Url = await s3Service.uploadFile(filePath, `songs/${title}`);
-    return SongModel.create({ title, artist, path: s3Url, size, uploadedBy });
+  async createSong(songData: CreateSongDto): Promise<SongModel> {
+    try {
+      return await SongModel.create(songData);
+    } catch (error) {
+      logger.error('Error creating song:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Retrieves song metadata by ID.
-   * @param songId - The ID of the song.
-   * @returns The song metadata or null if not found.
-   */
   async getSongDetails(songId: string): Promise<SongModel | null> {
-    return SongModel.findByPk(songId);
+    try {
+      return await SongModel.findByPk(songId);
+    } catch (error) {
+      logger.error('Error getting song details:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Deletes a song from S3 and removes its metadata from the database.
-   * @param songId - The ID of the song.
-   * @returns True if the song was deleted, false otherwise.
-   */
-  async deleteSong(songId: string): Promise<boolean> {
-    const song = await SongModel.findByPk(songId);
-    if (!song) return false;
+  async deleteSong(songId: string, userId: string): Promise<boolean> {
+    try {
+      const song = await SongModel.findByPk(songId);
 
-    await s3Service.deleteFile(song.path);
-    await song.destroy();
-    return true;
+      if (!song || song.uploadedBy !== userId) {
+        return false;
+      }
+
+      await song.destroy();
+      return true;
+    } catch (error) {
+      logger.error('Error deleting song:', error);
+      throw error;
+    }
   }
 }

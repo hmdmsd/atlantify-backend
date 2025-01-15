@@ -9,8 +9,21 @@ export class MusicBoxController {
    */
   async getSuggestions(req: Request, res: Response): Promise<void> {
     try {
-      const suggestions = await musicBoxService.getSuggestions();
-      res.status(200).json({ success: true, suggestions });
+      const {
+        items: suggestions,
+        total,
+        page,
+        totalPages,
+        hasMore,
+      } = await musicBoxService.getSuggestions({
+        sort: 'popular',
+        search: req.query.search as string,
+        page: parseInt(req.query.page as string, 10) || 1,
+        limit: parseInt(req.query.limit as string, 10) || 10,
+      });
+      res
+        .status(200)
+        .json({ success: true, suggestions, total, page, totalPages, hasMore });
     } catch (error) {
       console.error('Error retrieving suggestions:', error);
       res
@@ -18,14 +31,13 @@ export class MusicBoxController {
         .json({ success: false, message: 'Internal server error.' });
     }
   }
-
   /**
    * Adds a new song suggestion.
    */
   async addSuggestion(req: Request, res: Response): Promise<void> {
     try {
       const { title, artist } = req.body;
-      const userId = req.user?.sub as string;
+      const userId = req.user?.id;
 
       if (!title || !artist || !userId) {
         res.status(400).json({

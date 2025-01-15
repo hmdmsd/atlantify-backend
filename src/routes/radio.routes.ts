@@ -1,16 +1,23 @@
 import { Router } from 'express';
 import { RadioController } from '../controllers/radio.controller';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
 const radioController = new RadioController();
 
-// Define radio routes
-router.get('/queue', (req, res) => radioController.getQueue(req, res));
-router.post('/queue', (req, res) => radioController.addToQueue(req, res));
-router.delete('/queue/:id', (req, res) =>
-  radioController.removeFromQueue(req, res)
-);
-router.get('/current', (req, res) => radioController.getCurrent(req, res));
-router.get('/next', (req, res) => radioController.getNext(req, res));
+// Add authentication middleware
+router.use(authMiddleware);
+
+// Get current queue
+router.get('/queue', radioController.getQueue);
+
+// Add song to queue
+router.post('/queue', radioController.addToQueue);
+
+// Remove song from queue
+router.delete('/queue/:id', radioController.removeFromQueue);
+
+// Skip current track
+router.post('/skip', radioController.skipTrack);
 
 export default router;

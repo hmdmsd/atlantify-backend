@@ -1,17 +1,14 @@
-// types/express/index.d.ts
-import { JwtPayload } from 'jsonwebtoken';
+import { Request } from 'express';
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        username: string;
-        email: string;
-        role: string;
-        createdAt: string;
-        updatedAt: string;
-      };
-    }
+declare module 'express-serve-static-core' {
+  interface Request extends Request {
+    user?: {
+      id: string;
+      username: string;
+      email: string;
+      role: string;
+      createdAt: string;
+      updatedAt: string;
+    };
   }
 }

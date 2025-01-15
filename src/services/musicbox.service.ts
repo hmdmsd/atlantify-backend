@@ -4,8 +4,50 @@ export class MusicBoxService {
   /**
    * Retrieves all song suggestions, sorted by votes in descending order.
    */
-  async getSuggestions(): Promise<SuggestionModel[]> {
-    return SuggestionModel.findAll({ order: [['votes', 'DESC']] });
+  async getSuggestions(
+    filters: {
+      status?: 'pending' | 'approved' | 'rejected';
+      sort?: 'newest' | 'popular';
+      search?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<{
+    items: SuggestionModel[];
+    total: number;
+    page: number;
+    totalPages: number;
+    hasMore: boolean;
+  }> {
+    const where: WhereOptions = {
+      ...(filters.status && { status: filters.status }),
+      ...(filters.search && {
+        [Op.or]: [
+          { title: { [Op.like]: `%${filters.search}%` } },
+          { artist: { [Op.like]: `%${filters.search}%` } },
+        ],
+      }),
+    };
+
+    const order = [
+      ['votes', filters.sort === 'popular' ? 'DESC' : 'ASC'],
+      ['createdAt', filters.sort === 'newest' ? 'DESC' : 'ASC'],
+    ];
+
+    const { count, rows } = await SuggestionModel.findAndCountAll({
+      where,
+      order,
+      limit: filters.limit || 20,
+      offset: (filters.page || 1 - 1) * (filters.limit || 20),
+    });
+
+    return {
+      items: rows,
+      total: count,
+      page: filters.page || 1,
+      totalPages: Math.ceil(count / (filters.limit || 20)),
+      hasMore: rows.length === (filters.limit || 20),
+    };
   }
 
   /**
@@ -28,7 +70,6 @@ export class MusicBoxService {
       status: 'pending',
     });
   }
-
   /**
    * Casts a vote for a specific suggestion.
    * @param suggestionId - The ID of the suggestion to vote for.

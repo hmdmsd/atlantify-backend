@@ -1,57 +1,182 @@
+import { EventEmitter } from 'events';
 import { QueueModel } from '../models/queue.model';
 import { SongModel } from '../models/song.model';
+import { WebSocket } from 'ws';
 
-export class RadioService {
-  /**
-   * Retrieves the current radio queue sorted by position.
-   */
-  async getQueue(): Promise<QueueModel[]> {
-    return QueueModel.findAll({ order: [['position', 'ASC']] });
+interface QueueState {
+  currentTrack: any | null;
+  queue: any[];
+  listeners: number;
+}
+
+interface QueueUpdateEvent {
+  type: 'QUEUE_UPDATE' | 'TRACK_CHANGE' | 'LISTENERS_UPDATE';
+  data: Partial<QueueState>;
+}
+
+class RadioService extends EventEmitter {
+  private static instance: RadioService;
+  private queueState: QueueState = {
+    currentTrack: null,
+    queue: [],
+    listeners: 0,
+  };
+  private wsClients: Set<WebSocket> = new Set();
+
+  private constructor() {
+    super();
+    this.initializeQueue();
   }
 
-  /**
-   * Adds a song to the radio queue.
-   * @param songId - The ID of the song to add.
-   * @param userId - The ID of the user adding the song.
-   * @returns The newly added queue item.
-   */
-  async addToQueue(songId: string, userId: string): Promise<QueueModel> {
-    const position = (await QueueModel.count()) + 1;
-    return QueueModel.create({ songId, addedBy: userId, position });
+  public static getInstance(): RadioService {
+    if (!RadioService.instance) {
+      RadioService.instance = new RadioService();
+    }
+    return RadioService.instance;
   }
 
-  /**
-   * Removes a song from the queue by its ID.
-   * @param queueId - The ID of the queue item to remove.
-   * @returns True if the item was removed, false otherwise.
-   */
-  async removeFromQueue(queueId: string): Promise<boolean> {
+  private async initializeQueue() {
+    try {
+      const queue = await QueueModel.findAll({
+        order: [['position', 'ASC']],
+        include: [
+          {
+            model: SongModel,
+            attributes: ['id', 'title', 'artist', 'path', 'duration'],
+          },
+        ],
+      });
+
+      this.queueState.queue = queue.map((q) => ({
+        id: q.id,
+        song: q.song,
+        addedBy: q.addedBy,
+        position: q.position,
+      }));
+
+      if (this.queueState.queue.length > 0) {
+        this.queueState.currentTrack = this.queueState.queue[0];
+      }
+    } catch (error) {
+      console.error('Failed to initialize queue:', error);
+    }
+  }
+
+  public addWebSocketClient(ws: WebSocket) {
+    this.wsClients.add(ws);
+    this.queueState.listeners++;
+    this.broadcastUpdate({
+      type: 'LISTENERS_UPDATE',
+      data: { listeners: this.queueState.listeners },
+    });
+
+    ws.on('close', () => {
+      this.wsClients.delete(ws);
+      this.queueState.listeners--;
+      this.broadcastUpdate({
+        type: 'LISTENERS_UPDATE',
+        data: { listeners: this.queueState.listeners },
+      });
+    });
+  }
+
+  private broadcastUpdate(update: QueueUpdateEvent) {
+    const message = JSON.stringify(update);
+    this.wsClients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
+
+  public async addToQueue(songId: string, userId: string): Promise<QueueModel> {
+    const song = await SongModel.findByPk(songId, {
+      attributes: ['id', 'title', 'artist', 'path', 'duration'],
+    });
+
+    if (!song) {
+      throw new Error('Song not found');
+    }
+
+    const position = this.queueState.queue.length + 1;
+    const queueItem = await QueueModel.create({
+      songId,
+      addedBy: userId,
+      position,
+    });
+
+    const queueWithSong = await QueueModel.findByPk(queueItem.id, {
+      include: [
+        {
+          model: SongModel,
+          attributes: ['id', 'title', 'artist', 'path', 'duration'],
+        },
+      ],
+    });
+
+    const formattedQueueItem = {
+      id: queueWithSong.id,
+      song: queueWithSong.song,
+      addedBy: queueWithSong.addedBy,
+      position: queueWithSong.position,
+    };
+
+    this.queueState.queue.push(formattedQueueItem);
+
+    this.broadcastUpdate({
+      type: 'QUEUE_UPDATE',
+      data: { queue: this.queueState.queue },
+    });
+
+    return queueItem;
+  }
+
+  public async removeFromQueue(queueId: string): Promise<boolean> {
     const queueItem = await QueueModel.findByPk(queueId);
     if (!queueItem) return false;
 
     await queueItem.destroy();
+    this.queueState.queue = this.queueState.queue.filter(
+      (item) => item.id !== queueId
+    );
+
+    // Reorder remaining queue items
+    this.queueState.queue.forEach((item, index) => {
+      item.position = index + 1;
+    });
+
+    this.broadcastUpdate({
+      type: 'QUEUE_UPDATE',
+      data: { queue: this.queueState.queue },
+    });
+
     return true;
   }
 
-  /**
-   * Retrieves the current song playing on the radio (position 1 in queue).
-   */
-  async getCurrent(): Promise<SongModel | null> {
-    const current = await QueueModel.findOne({
-      where: { position: 1 },
-      include: SongModel,
+  public async skipCurrentTrack(): Promise<void> {
+    if (this.queueState.queue.length === 0) {
+      throw new Error('No tracks in queue');
+    }
+
+    // Remove current track
+    await this.removeFromQueue(this.queueState.currentTrack.id);
+
+    // Set next track as current
+    this.queueState.currentTrack = this.queueState.queue[0] || null;
+
+    this.broadcastUpdate({
+      type: 'TRACK_CHANGE',
+      data: { currentTrack: this.queueState.currentTrack },
     });
-    return current ? current.getDataValue('Song') : null;
   }
 
-  /**
-   * Retrieves the next song in the queue (position 2 in queue).
-   */
-  async getNext(): Promise<SongModel | null> {
-    const next = await QueueModel.findOne({
-      where: { position: 2 },
-      include: SongModel,
-    });
-    return next ? next.getDataValue('Song') : null;
+  public getCurrentQueue(): QueueState {
+    return {
+      currentTrack: this.queueState.currentTrack,
+      queue: this.queueState.queue,
+      listeners: this.queueState.listeners,
+    };
   }
 }
+
+export const radioService = RadioService.getInstance();

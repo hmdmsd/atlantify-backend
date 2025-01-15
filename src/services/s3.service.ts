@@ -1,7 +1,8 @@
 import AWS from 'aws-sdk';
-import { s3Config, s3Credentials } from '../config/s3.config';
 import fs from 'fs';
 import path from 'path';
+import { s3Config } from '../config/s3.config';
+import logger from '../utils/logger';
 
 export class S3Service {
   private s3: AWS.S3;
@@ -10,46 +11,65 @@ export class S3Service {
     this.s3 = new AWS.S3({
       endpoint: s3Config.endpoint,
       region: s3Config.region,
-      accessKeyId: s3Credentials.accessKeyId,
-      secretAccessKey: s3Credentials.secretAccessKey,
-      s3ForcePathStyle: true, // Needed for S3-compatible services like Deuxfleurs Garage
+      accessKeyId: s3Config.accessKeyId,
+      secretAccessKey: s3Config.secretAccessKey,
+      s3ForcePathStyle: true,
+      signatureVersion: 'v4',
+      sslEnabled: true,
+      httpOptions: {
+        timeout: 0,
+      },
     });
   }
 
-  /**
-   * Uploads a file to S3.
-   * @param localFilePath - Path to the file on the local system.
-   * @param key - S3 object key (path in the bucket).
-   * @returns The S3 URL of the uploaded file.
-   */
-  async uploadFile(localFilePath: string, key: string): Promise<string> {
+  async uploadFile(
+    filePath: string,
+    key: string,
+    onProgress?: (progress: number) => void
+  ): Promise<string> {
     try {
-      const fileContent = fs.readFileSync(localFilePath);
+      // Read file from disk
+      const fileStream = fs.createReadStream(filePath);
+      const fileSize = fs.statSync(filePath).size;
+      let uploadedBytes = 0;
 
-      await this.s3
-        .putObject({
-          Bucket: s3Config.bucket,
-          Key: key,
-          Body: fileContent,
-          ContentType: this.getMimeType(localFilePath),
-        })
-        .promise();
+      const uploadParams: AWS.S3.PutObjectRequest = {
+        Bucket: s3Config.bucket,
+        Key: `songs/${key}`,
+        Body: fileStream,
+        ContentType: this.getContentType(key),
+        ACL: 'public-read', // Ensure the file is publicly readable
+      };
 
-      console.log(`File uploaded to S3: ${key}`);
-      return `${s3Config.endpoint}/${s3Config.bucket}/${key}`;
+      return new Promise((resolve, reject) => {
+        const upload = this.s3.upload(uploadParams, (err, data) => {
+          if (err) {
+            logger.error('S3 Upload Error:', err);
+            return reject(err);
+          }
+          resolve(data.Location);
+        });
+
+        // Track upload progress
+        fileStream.on('data', (chunk) => {
+          uploadedBytes += chunk.length;
+          if (onProgress) {
+            const progress = Math.round((uploadedBytes / fileSize) * 100);
+            onProgress(progress);
+          }
+        });
+
+        fileStream.on('error', (err) => {
+          logger.error('File Stream Error:', err);
+          reject(err);
+        });
+      });
     } catch (error) {
-      console.error('Error uploading file to S3:', error);
-      throw new Error('Failed to upload file to S3.');
-    } finally {
-      // Optionally delete the local file after uploading
-      fs.unlinkSync(localFilePath);
+      logger.error('Upload File Error:', error);
+      throw error;
     }
   }
 
-  /**
-   * Deletes a file from S3.
-   * @param key - S3 object key (path in the bucket).
-   */
   async deleteFile(key: string): Promise<void> {
     try {
       await this.s3
@@ -58,52 +78,28 @@ export class S3Service {
           Key: key,
         })
         .promise();
-
-      console.log(`File deleted from S3: ${key}`);
     } catch (error) {
-      console.error('Error deleting file from S3:', error);
-      throw new Error('Failed to delete file from S3.');
+      logger.error('Delete File Error:', error);
+      throw error;
     }
   }
 
-  /**
-   * Retrieves a file's signed URL for direct download.
-   * @param key - S3 object key (path in the bucket).
-   * @param expiresInSeconds - Expiration time for the signed URL (default: 3600 seconds).
-   * @returns The signed URL for downloading the file.
-   */
-  async getSignedUrl(
-    key: string,
-    expiresInSeconds: number = 3600
-  ): Promise<string> {
-    try {
-      const signedUrl = this.s3.getSignedUrl('getObject', {
-        Bucket: s3Config.bucket,
-        Key: key,
-        Expires: expiresInSeconds,
-      });
-
-      console.log(`Generated signed URL: ${signedUrl}`);
-      return signedUrl;
-    } catch (error) {
-      console.error('Error generating signed URL:', error);
-      throw new Error('Failed to generate signed URL.');
+  private getContentType(filename: string): string {
+    const ext = path.extname(filename).toLowerCase().slice(1);
+    switch (ext) {
+      case 'mp3':
+        return 'audio/mpeg';
+      case 'ogg':
+        return 'audio/ogg';
+      case 'wav':
+        return 'audio/wav';
+      default:
+        return 'application/octet-stream';
     }
   }
 
-  /**
-   * Determines the MIME type of a file based on its extension.
-   * @param filePath - Path to the file.
-   * @returns The MIME type as a string.
-   */
-  private getMimeType(filePath: string): string {
-    const ext = path.extname(filePath).toLowerCase();
-    const mimeTypes: { [key: string]: string } = {
-      '.mp3': 'audio/mpeg',
-      '.ogg': 'audio/ogg',
-      '.wav': 'audio/wav',
-    };
-
-    return mimeTypes[ext] || 'application/octet-stream';
+  // Additional method to generate a public URL
+  getPublicUrl(key: string): string {
+    return `${s3Config.endpoint}/${s3Config.bucket}/${key}`;
   }
 }
