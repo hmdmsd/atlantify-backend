@@ -2,26 +2,43 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { jwtConfig } from '../config/jwt.config';
 
-export const authMiddleware = (
+interface JwtUserPayload {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
-  const token = req.headers.authorization?.split(' ')[1]; // Extract token from "Authorization: Bearer <token>"
-
-  if (!token) {
-    res
-      .status(401)
-      .json({ success: false, message: 'Authorization token is required.' });
-    return;
-  }
-
+) => {
   try {
-    const decoded = jwt.verify(token, jwtConfig.secret) as jwt.JwtPayload;
-    req.user = decoded; // Attach user info to the request object
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Authorization token is required.' });
+    }
+
+    const decoded = jwt.verify(token, jwtConfig.secret) as JwtUserPayload;
+
+    req.user = {
+      id: decoded.id,
+      username: decoded.username,
+      email: decoded.email,
+      role: decoded.role,
+      createdAt: decoded.createdAt,
+      updatedAt: decoded.updatedAt,
+    };
+
     next();
   } catch (error) {
-    res
+    return res
       .status(401)
       .json({ success: false, message: 'Invalid or expired token.' });
   }

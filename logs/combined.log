@@ -197,3 +197,175 @@
 2025-01-15T03:55:12.248Z [INFO]: Database synced.
 2025-01-15T03:55:12.250Z [INFO]: Server running at http://localhost:4000
 2025-01-15T03:55:12.574Z [INFO]: WebSocket connection established.
+2025-01-15T14:40:34.025Z [INFO]: Express app configured.
+2025-01-15T14:40:34.054Z [INFO]: SQLite database connected successfully.
+2025-01-15T14:40:34.079Z [INFO]: Database synced.
+2025-01-15T14:40:34.081Z [INFO]: Server running at http://localhost:4000
+2025-01-15T14:41:12.554Z [INFO]: WebSocket connection established.
+2025-01-15T14:41:12.567Z [INFO]: WebSocket connection established.
+2025-01-15T14:41:15.664Z [INFO]: WebSocket connection closed.
+2025-01-15T14:41:15.665Z [INFO]: WebSocket connection closed.
+2025-01-15T14:41:15.712Z [INFO]: WebSocket connection established.
+2025-01-15T14:41:15.727Z [INFO]: WebSocket connection established.
+2025-01-15T14:46:25.863Z [INFO]: WebSocket connection closed.
+2025-01-15T14:46:25.863Z [INFO]: WebSocket connection closed.
+2025-01-15T14:46:25.932Z [INFO]: WebSocket connection established.
+2025-01-15T14:46:25.945Z [INFO]: WebSocket connection established.
+2025-01-15T14:55:36.883Z [INFO]: Express app configured.
+2025-01-15T14:55:36.909Z [INFO]: SQLite database connected successfully.
+2025-01-15T14:55:36.934Z [INFO]: Database synced.
+2025-01-15T14:55:36.936Z [INFO]: Server running at http://localhost:4000
+2025-01-15T14:55:43.611Z [INFO]: WebSocket connection established.
+2025-01-15T14:56:07.515Z [INFO]: WebSocket connection closed.
+2025-01-15T14:56:07.654Z [INFO]: WebSocket connection established.
+2025-01-15T14:56:07.667Z [INFO]: WebSocket connection established.
+2025-01-15T14:57:10.817Z [INFO]: Express app configured.
+2025-01-15T14:57:10.847Z [INFO]: SQLite database connected successfully.
+2025-01-15T14:57:10.877Z [INFO]: Database synced.
+2025-01-15T14:57:10.879Z [INFO]: Server running at http://localhost:4000
+2025-01-15T14:57:11.669Z [INFO]: Express app configured.
+2025-01-15T14:57:11.726Z [INFO]: SQLite database connected successfully.
+2025-01-15T14:57:11.775Z [INFO]: Database synced.
+2025-01-15T14:57:11.778Z [INFO]: Server running at http://localhost:4000
+2025-01-15T14:57:14.615Z [INFO]: WebSocket connection established.
+2025-01-15T14:57:24.662Z [INFO]: Express app configured.
+2025-01-15T14:57:24.685Z [INFO]: SQLite database connected successfully.
+2025-01-15T14:57:24.709Z [INFO]: Database synced.
+2025-01-15T14:57:24.710Z [INFO]: Server running at http://localhost:4000
+2025-01-15T14:57:27.608Z [INFO]: WebSocket connection established.
+2025-01-15T14:57:55.144Z [INFO]: Express app configured.
+2025-01-15T14:57:55.171Z [INFO]: SQLite database connected successfully.
+2025-01-15T14:57:55.198Z [INFO]: Database synced.
+2025-01-15T14:57:55.200Z [INFO]: Server running at http://localhost:4000
+2025-01-15T14:58:02.556Z [INFO]: WebSocket connection established.
+2025-01-15T15:01:59.634Z [INFO]: WebSocket connection closed.
+2025-01-15T15:01:59.840Z [INFO]: WebSocket connection established.
+2025-01-15T15:01:59.852Z [INFO]: WebSocket connection established.
+2025-01-15T15:02:01.630Z [INFO]: WebSocket connection closed.
+2025-01-15T15:02:01.635Z [INFO]: WebSocket connection closed.
+2025-01-15T15:02:01.785Z [INFO]: WebSocket connection established.
+2025-01-15T15:02:01.798Z [INFO]: WebSocket connection established.
+2025-01-15T15:02:28.366Z [INFO]: WebSocket connection established.
+2025-01-15T15:02:28.379Z [INFO]: WebSocket connection established.
+2025-01-15T15:02:48.632Z [INFO]: WebSocket connection closed.
+2025-01-15T15:02:48.632Z [INFO]: WebSocket connection closed.
+2025-01-15T15:02:48.633Z [INFO]: WebSocket connection closed.
+2025-01-15T15:02:48.633Z [INFO]: WebSocket connection closed.
+2025-01-15T15:02:48.704Z [INFO]: WebSocket connection established.
+2025-01-15T15:02:48.716Z [INFO]: WebSocket connection established.
+2025-01-15T15:02:48.771Z [INFO]: WebSocket connection established.
+2025-01-15T15:02:48.784Z [INFO]: WebSocket connection established.
+2025-01-15T15:03:07.681Z [INFO]: WebSocket connection established.
+2025-01-15T15:03:07.697Z [INFO]: WebSocket connection established.
+2025-01-15T15:03:19.631Z [INFO]: WebSocket connection closed.
+2025-01-15T15:03:19.633Z [INFO]: WebSocket connection closed.
+2025-01-15T15:03:19.633Z [INFO]: WebSocket connection closed.
+2025-01-15T15:03:19.633Z [INFO]: WebSocket connection closed.
+2025-01-15T15:03:19.634Z [INFO]: WebSocket connection closed.
+2025-01-15T15:03:19.634Z [INFO]: WebSocket connection closed.
+2025-01-15T15:03:19.732Z [INFO]: WebSocket connection established.
+2025-01-15T15:03:19.746Z [INFO]: WebSocket connection established.
+2025-01-15T15:03:19.807Z [INFO]: WebSocket connection established.
+2025-01-15T15:03:19.832Z [INFO]: WebSocket connection established.
+2025-01-15T15:04:01.095Z [INFO]: WebSocket connection established.
+2025-01-15T15:04:01.108Z [INFO]: WebSocket connection established.
+2025-01-15T15:04:05.412Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:05.414Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:05.415Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:05.416Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:05.417Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:05.417Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:05.457Z [INFO]: WebSocket connection established.
+2025-01-15T15:04:05.470Z [INFO]: WebSocket connection established.
+2025-01-15T15:04:13.319Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:13.320Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:13.447Z [INFO]: WebSocket connection established.
+2025-01-15T15:04:13.458Z [INFO]: WebSocket connection established.
+2025-01-15T15:04:20.235Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:20.237Z [INFO]: WebSocket connection closed.
+2025-01-15T15:04:20.337Z [INFO]: WebSocket connection established.
+2025-01-15T15:04:20.349Z [INFO]: WebSocket connection established.
+2025-01-15T15:05:34.754Z [INFO]: WebSocket connection established.
+2025-01-15T15:05:34.773Z [INFO]: WebSocket connection established.
+2025-01-15T15:06:15.203Z [INFO]: WebSocket connection established.
+2025-01-15T15:06:15.216Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:31.633Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:31.635Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:31.635Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:31.637Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:31.637Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:31.637Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:31.757Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:31.769Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:31.941Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:31.967Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:32.619Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:32.621Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:32.621Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:32.621Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:32.753Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:32.766Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:32.846Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:32.869Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:57.864Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:57.864Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:57.864Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:57.865Z [INFO]: WebSocket connection closed.
+2025-01-15T15:08:57.929Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:57.945Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:57.969Z [INFO]: WebSocket connection established.
+2025-01-15T15:08:57.987Z [INFO]: WebSocket connection established.
+2025-01-15T15:09:03.550Z [INFO]: WebSocket connection closed.
+2025-01-15T15:09:03.551Z [INFO]: WebSocket connection closed.
+2025-01-15T15:09:03.551Z [INFO]: WebSocket connection closed.
+2025-01-15T15:09:03.551Z [INFO]: WebSocket connection closed.
+2025-01-15T15:09:03.608Z [INFO]: WebSocket connection established.
+2025-01-15T15:09:03.628Z [INFO]: WebSocket connection established.
+2025-01-15T15:09:07.986Z [INFO]: WebSocket connection closed.
+2025-01-15T15:09:07.987Z [INFO]: WebSocket connection closed.
+2025-01-15T15:09:08.091Z [INFO]: WebSocket connection established.
+2025-01-15T15:09:08.104Z [INFO]: WebSocket connection established.
+2025-01-15T15:14:23.637Z [INFO]: WebSocket connection closed.
+2025-01-15T15:14:23.637Z [INFO]: WebSocket connection closed.
+2025-01-15T15:14:23.849Z [INFO]: WebSocket connection established.
+2025-01-15T15:14:23.865Z [INFO]: WebSocket connection established.
+2025-01-15T15:14:48.462Z [INFO]: WebSocket connection closed.
+2025-01-15T15:14:48.462Z [INFO]: WebSocket connection closed.
+2025-01-15T15:14:48.521Z [INFO]: WebSocket connection established.
+2025-01-15T15:14:48.532Z [INFO]: WebSocket connection established.
+2025-01-15T15:15:57.627Z [INFO]: WebSocket connection closed.
+2025-01-15T15:15:57.627Z [INFO]: WebSocket connection closed.
+2025-01-15T15:15:57.703Z [INFO]: WebSocket connection established.
+2025-01-15T15:15:57.715Z [INFO]: WebSocket connection established.
+2025-01-15T15:15:59.711Z [INFO]: WebSocket connection closed.
+2025-01-15T15:15:59.711Z [INFO]: WebSocket connection closed.
+2025-01-15T15:15:59.766Z [INFO]: WebSocket connection established.
+2025-01-15T15:15:59.778Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:00.196Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:00.196Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:00.256Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:00.269Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:07.086Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:07.098Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:14.787Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:16.386Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:16.387Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:16.387Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:16.387Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:16.387Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:16.458Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:16.476Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:16.505Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:16.518Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:56.420Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:56.420Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:56.421Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:56.421Z [INFO]: WebSocket connection closed.
+2025-01-15T15:19:56.487Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:56.499Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:56.533Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:56.561Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:59.488Z [INFO]: WebSocket connection established.
+2025-01-15T15:19:59.500Z [INFO]: WebSocket connection established.
+2025-01-15T15:20:35.945Z [INFO]: WebSocket connection established.
+2025-01-15T15:20:35.956Z [INFO]: WebSocket connection established.
