@@ -1,4 +1,5 @@
-import { DataTypes, Model } from 'sequelize';
+// src/models/suggestion.model.ts
+import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.config';
 
 export class SuggestionModel extends Model {
@@ -6,9 +7,8 @@ export class SuggestionModel extends Model {
   public title!: string;
   public artist!: string;
   public suggestedBy!: string;
-  public votes!: number;
+  public voteCount!: number;
   public status!: 'pending' | 'approved' | 'rejected';
-
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -32,7 +32,7 @@ SuggestionModel.init(
       type: DataTypes.UUID,
       allowNull: false,
     },
-    votes: {
+    voteCount: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
@@ -47,3 +47,5 @@ SuggestionModel.init(
     timestamps: true,
   }
 );
+
+export default SuggestionModel;

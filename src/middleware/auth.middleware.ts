@@ -17,29 +17,44 @@ export const authMiddleware = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    // Get token from header
+    const authHeader = req.headers.authorization;
+    console.log('Auth header:', authHeader); // Debug log
 
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res
         .status(401)
         .json({ success: false, message: 'Authorization token is required.' });
     }
 
-    const decoded = jwt.verify(token, jwtConfig.secret) as JwtUserPayload;
+    const token = authHeader.split(' ')[1];
+    console.log('Token:', token); // Debug log
 
-    req.user = {
-      id: decoded.id,
-      username: decoded.username,
-      email: decoded.email,
-      role: decoded.role,
-      createdAt: decoded.createdAt,
-      updatedAt: decoded.updatedAt,
-    };
+    try {
+      const decoded = jwt.verify(token, jwtConfig.secret) as JwtUserPayload;
+      console.log('Decoded token:', decoded); // Debug log
 
-    next();
+      // Set user info in request
+      req.user = {
+        id: decoded.id,
+        username: decoded.username,
+        email: decoded.email,
+        role: decoded.role,
+        createdAt: decoded.createdAt,
+        updatedAt: decoded.updatedAt,
+      };
+
+      next();
+    } catch (jwtError) {
+      console.error('JWT verification failed:', jwtError);
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid or expired token.' });
+    }
   } catch (error) {
+    console.error('Auth middleware error:', error);
     return res
-      .status(401)
-      .json({ success: false, message: 'Invalid or expired token.' });
+      .status(500)
+      .json({ success: false, message: 'Internal server error.' });
   }
 };

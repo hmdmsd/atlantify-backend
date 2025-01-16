@@ -5,6 +5,10 @@ import logger from './utils/logger';
 import { sequelize } from './config/database.config';
 import dotenv from 'dotenv';
 import { radioService } from './services/radio.service';
+import { initializeAssociations } from './models/associations';
+
+// Initialize model associations
+initializeAssociations();
 
 // Load environment variables from .env file
 dotenv.config();
