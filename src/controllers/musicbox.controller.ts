@@ -41,6 +41,7 @@ export class MusicBoxController {
       });
     }
   }
+
   async getSuggestions(req: Request, res: Response): Promise<void> {
     try {
       console.log('Getting suggestions with query:', req.query);
@@ -76,7 +77,6 @@ export class MusicBoxController {
       console.log('Request headers:', req.headers);
       console.log('Request user:', req.user);
 
-      // Type assertion for req.user
       interface AuthUser {
         id: string;
         username: string;
@@ -102,23 +102,41 @@ export class MusicBoxController {
       }
 
       console.log('Adding suggestion:', { title, artist, userId: user.id });
-      const suggestion = await musicBoxService.addSuggestion(
+      const { suggestion, exists } = await musicBoxService.addSuggestion(
         title,
         artist,
         user.id
       );
 
+      if (exists) {
+        res.status(409).json({
+          success: false,
+          message: 'This song has already been suggested.',
+          existingSuggestion: {
+            id: suggestion!.id,
+            title: suggestion!.title,
+            artist: suggestion!.artist,
+            suggestedBy: suggestion!.suggestedBy,
+            voteCount: suggestion!.voteCount,
+            status: suggestion!.status,
+            createdAt: suggestion!.createdAt,
+            updatedAt: suggestion!.updatedAt,
+          }
+        });
+        return;
+      }
+
       res.status(201).json({
         success: true,
         suggestion: {
-          id: suggestion.id,
-          title: suggestion.title,
-          artist: suggestion.artist,
-          suggestedBy: suggestion.suggestedBy,
-          votes: suggestion.votes,
-          status: suggestion.status,
-          createdAt: suggestion.createdAt,
-          updatedAt: suggestion.updatedAt,
+          id: suggestion!.id,
+          title: suggestion!.title,
+          artist: suggestion!.artist,
+          suggestedBy: suggestion!.suggestedBy,
+          voteCount: suggestion!.voteCount,
+          status: suggestion!.status,
+          createdAt: suggestion!.createdAt,
+          updatedAt: suggestion!.updatedAt,
         },
       });
     } catch (error) {
@@ -131,57 +149,10 @@ export class MusicBoxController {
     }
   }
 
-  async voteSuggestion(req: Request, res: Response): Promise<void> {
-    try {
-      const { id: suggestionId } = req.params;
-      const user = req.user as { id: string };
-
-      console.log('Vote request:', { suggestionId, user });
-
-      if (!user || !user.id) {
-        console.error('No user ID found in request');
-        res.status(401).json({
-          success: false,
-          message: 'User must be authenticated to vote.',
-        });
-        return;
-      }
-
-      if (!suggestionId) {
-        res.status(400).json({
-          success: false,
-          message: 'Suggestion ID is required.',
-        });
-        return;
-      }
-
-      const success = await musicBoxService.voteSuggestion(
-        suggestionId,
-        user.id
-      );
-      if (!success) {
-        res.status(400).json({
-          success: false,
-          message: 'Unable to vote on suggestion.',
-        });
-        return;
-      }
-
-      res.status(200).json({ success: true, message: 'Vote registered.' });
-    } catch (error) {
-      console.error('Error voting on suggestion:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to register vote.',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-    }
-  }
-
   async removeSuggestion(req: Request, res: Response): Promise<void> {
     try {
       const { id: suggestionId } = req.params;
-      const user = req.user as { id: string; role: string };
+      const user = req.user as unknown as { id: string; role: string };
 
       console.log('Remove suggestion request:', { suggestionId, user });
 
@@ -202,7 +173,6 @@ export class MusicBoxController {
         return;
       }
 
-      // Optional: Check if user is admin or the suggestion creator
       const suggestion = await musicBoxService.getSuggestionById(suggestionId);
       if (!suggestion) {
         res.status(404).json({

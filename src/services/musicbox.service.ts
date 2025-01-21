@@ -1,4 +1,4 @@
-import { Op, WhereOptions } from 'sequelize';
+import { Op, WhereOptions, Sequelize } from 'sequelize';
 import { SuggestionModel } from '../models/suggestion.model';
 import VoteModel from '../models/vote.model';
 
@@ -13,7 +13,6 @@ export class MusicBoxService {
         throw new Error('Suggestion not found');
       }
 
-      // Check if user has already voted
       const existingVote = await VoteModel.findOne({
         where: {
           suggestionId,
@@ -22,18 +21,16 @@ export class MusicBoxService {
       });
 
       if (existingVote) {
-        // Remove vote
         await existingVote.destroy();
-        suggestion.voteCount -= 1; // Using voteCount instead of votes
+        suggestion.voteCount -= 1;
         await suggestion.save();
         return { success: true, hasVoted: false };
       } else {
-        // Add vote
         await VoteModel.create({
           suggestionId,
           userId,
         });
-        suggestion.voteCount += 1; // Using voteCount instead of votes
+        suggestion.voteCount += 1;
         await suggestion.save();
         return { success: true, hasVoted: true };
       }
@@ -43,9 +40,6 @@ export class MusicBoxService {
     }
   }
 
-  /**
-   * Retrieves all song suggestions with filtering and pagination.
-   */
   async getSuggestions(
     filters: {
       status?: 'pending' | 'approved' | 'rejected';
@@ -90,7 +84,7 @@ export class MusicBoxService {
           },
           {
             model: VoteModel,
-            as: 'userVotes', // Changed from 'votes' to 'userVotes'
+            as: 'userVotes',
             where: filters.userId ? { userId: filters.userId } : undefined,
             required: false,
           },
@@ -99,7 +93,7 @@ export class MusicBoxService {
 
       const suggestions = rows.map((suggestion) => ({
         ...suggestion.toJSON(),
-        hasVoted: suggestion.userVotes?.length > 0, // Changed from votes to userVotes
+        hasVoted: suggestion.userVotes?.length > 0,
       }));
 
       return {
@@ -114,14 +108,12 @@ export class MusicBoxService {
       throw error;
     }
   }
-  /**
-   * Adds a new song suggestion.
-   */
+
   async addSuggestion(
     title: string,
     artist: string,
     userId: string
-  ): Promise<SuggestionModel> {
+  ): Promise<{ suggestion: SuggestionModel | null; exists: boolean }> {
     try {
       console.log('Creating new suggestion:', { title, artist, userId });
 
@@ -129,80 +121,43 @@ export class MusicBoxService {
         throw new Error('Title, artist, and userId are required');
       }
 
+      // Check for existing suggestion with same title and artist
+      // Using LOWER() for case-insensitive comparison in SQLite
+      const existingSuggestion = await SuggestionModel.findOne({
+        where: {
+          [Op.and]: [
+            Sequelize.where(
+              Sequelize.fn('LOWER', Sequelize.col('title')),
+              Sequelize.fn('LOWER', title.trim())
+            ),
+            Sequelize.where(
+              Sequelize.fn('LOWER', Sequelize.col('artist')),
+              Sequelize.fn('LOWER', artist.trim())
+            )
+          ]
+        }
+      });
+
+      if (existingSuggestion) {
+        return { suggestion: existingSuggestion, exists: true };
+      }
+
       const suggestion = await SuggestionModel.create({
         title: title.trim(),
         artist: artist.trim(),
         suggestedBy: userId,
-        votes: 0,
+        voteCount: 0,
         status: 'pending',
       });
 
       console.log('Suggestion created:', suggestion.toJSON());
-      return suggestion;
+      return { suggestion, exists: false };
     } catch (error) {
       console.error('Error in addSuggestion:', error);
       throw error;
     }
   }
 
-  /**
-   * Casts a vote for a specific suggestion.
-   */
-  async voteSuggestion(suggestionId: string, userId: string): Promise<boolean> {
-    try {
-      console.log('Processing vote:', { suggestionId, userId });
-
-      const suggestion = await SuggestionModel.findByPk(suggestionId);
-      if (!suggestion) {
-        console.log('Suggestion not found:', suggestionId);
-        return false;
-      }
-
-      // Optional: Check if user has already voted
-      // const hasVoted = await VoteModel.findOne({
-      //   where: { suggestionId, userId }
-      // });
-      // if (hasVoted) return false;
-
-      suggestion.votes += 1;
-      await suggestion.save();
-
-      // Optional: Record the vote
-      // await VoteModel.create({ suggestionId, userId });
-
-      console.log('Vote recorded successfully');
-      return true;
-    } catch (error) {
-      console.error('Error in voteSuggestion:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Removes a song suggestion.
-   */
-  async removeSuggestion(suggestionId: string): Promise<boolean> {
-    try {
-      console.log('Attempting to remove suggestion:', suggestionId);
-
-      const suggestion = await SuggestionModel.findByPk(suggestionId);
-      if (!suggestion) {
-        console.log('Suggestion not found:', suggestionId);
-        return false;
-      }
-
-      await suggestion.destroy();
-      console.log('Suggestion removed successfully');
-      return true;
-    } catch (error) {
-      console.error('Error in removeSuggestion:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get a suggestion by ID
-   */
   async getSuggestionById(
     suggestionId: string
   ): Promise<SuggestionModel | null> {
@@ -227,6 +182,34 @@ export class MusicBoxService {
       return suggestion;
     } catch (error) {
       console.error('Error in getSuggestionById:', error);
+      throw error;
+    }
+  }
+
+  async removeSuggestion(suggestionId: string): Promise<boolean> {
+    try {
+      console.log('Attempting to remove suggestion:', suggestionId);
+
+      const suggestion = await SuggestionModel.findByPk(suggestionId);
+      if (!suggestion) {
+        console.log('Suggestion not found:', suggestionId);
+        return false;
+      }
+
+      // Remove all associated votes first to maintain referential integrity
+      await VoteModel.destroy({
+        where: {
+          suggestionId
+        }
+      });
+
+      // Then remove the suggestion itself
+      await suggestion.destroy();
+      
+      console.log('Suggestion and associated votes removed successfully');
+      return true;
+    } catch (error) {
+      console.error('Error in removeSuggestion:', error);
       throw error;
     }
   }

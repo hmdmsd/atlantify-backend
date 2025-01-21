@@ -9328,3 +9328,201 @@
 2025-01-21T08:53:10.889Z [INFO]: WebSocket connection from: ::1
 2025-01-21T08:53:11.515Z [INFO]: WebSocket connection closed
 2025-01-21T08:53:11.515Z [INFO]: WebSocket connection closed
+2025-01-21T09:55:21.692Z [INFO]: Express app configured.
+2025-01-21T09:55:21.810Z [INFO]: SQLite database connected successfully.
+2025-01-21T09:55:21.856Z [INFO]: Database synced.
+2025-01-21T09:55:21.861Z [INFO]: Server running at http://localhost:4000
+2025-01-21T09:55:21.862Z [INFO]: WebSocket server running at ws://localhost:4000
+2025-01-21T09:55:28.343Z [INFO]: WebSocket connection established
+2025-01-21T09:55:28.344Z [INFO]: WebSocket connection from: ::1
+2025-01-21T09:58:11.787Z [INFO]: WebSocket connection established
+2025-01-21T09:58:11.789Z [INFO]: WebSocket connection from: ::1
+2025-01-21T09:58:11.833Z [INFO]: WebSocket connection established
+2025-01-21T09:58:11.835Z [INFO]: WebSocket connection from: ::1
+2025-01-21T09:58:11.839Z [INFO]: WebSocket connection closed
+2025-01-21T09:58:11.841Z [INFO]: WebSocket connection closed
+2025-01-21T09:58:11.860Z [INFO]: WebSocket connection established
+2025-01-21T09:58:11.861Z [INFO]: WebSocket connection from: ::1
+2025-01-21T09:58:11.880Z [INFO]: WebSocket connection established
+2025-01-21T09:58:11.881Z [INFO]: WebSocket connection from: ::1
+2025-01-21T09:58:13.990Z [INFO]: WebSocket connection closed
+2025-01-21T09:58:13.993Z [INFO]: WebSocket connection closed
+2025-01-21T09:58:14.811Z [INFO]: WebSocket connection established
+2025-01-21T09:58:14.812Z [INFO]: WebSocket connection from: ::1
+2025-01-21T09:58:14.835Z [INFO]: WebSocket connection established
+2025-01-21T09:58:14.835Z [INFO]: WebSocket connection from: ::1
+2025-01-21T09:58:17.013Z [INFO]: WebSocket connection established
+2025-01-21T09:58:17.014Z [INFO]: WebSocket connection from: ::1
+2025-01-21T09:58:17.028Z [INFO]: WebSocket connection established
+2025-01-21T09:58:17.028Z [INFO]: WebSocket connection from: ::1
+2025-01-21T09:58:57.460Z [INFO]: WebSocket connection closed
+2025-01-21T09:58:57.460Z [INFO]: WebSocket connection closed
+2025-01-21T09:58:57.461Z [INFO]: WebSocket connection closed
+2025-01-21T09:58:57.462Z [INFO]: WebSocket connection closed
+2025-01-21T09:58:57.462Z [INFO]: WebSocket connection closed
+2025-01-21T09:58:57.688Z [INFO]: WebSocket connection established
+2025-01-21T09:58:57.688Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:07:30.200Z [INFO]: Express app configured.
+2025-01-21T10:07:30.301Z [INFO]: SQLite database connected successfully.
+2025-01-21T10:07:30.342Z [INFO]: Database synced.
+2025-01-21T10:07:30.347Z [INFO]: Server running at http://localhost:4000
+2025-01-21T10:07:30.348Z [INFO]: WebSocket server running at ws://localhost:4000
+2025-01-21T10:07:36.500Z [INFO]: WebSocket connection established
+2025-01-21T10:07:36.501Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:07:37.020Z [INFO]: WebSocket connection established
+2025-01-21T10:07:37.021Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:07:37.052Z [INFO]: WebSocket connection established
+2025-01-21T10:07:37.053Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:07:37.076Z [INFO]: WebSocket connection established
+2025-01-21T10:07:37.077Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:07:37.094Z [INFO]: WebSocket connection closed
+2025-01-21T10:07:37.096Z [INFO]: WebSocket connection closed
+2025-01-21T10:07:37.105Z [INFO]: WebSocket connection established
+2025-01-21T10:07:37.105Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:07:40.081Z [INFO]: WebSocket connection established
+2025-01-21T10:07:40.082Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:07:40.095Z [INFO]: WebSocket connection established
+2025-01-21T10:07:40.096Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:07:40.331Z [INFO]: WebSocket connection closed
+2025-01-21T10:07:40.333Z [INFO]: WebSocket connection closed
+2025-01-21T10:07:43.343Z [INFO]: WebSocket connection established
+2025-01-21T10:07:43.343Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:07:43.362Z [INFO]: WebSocket connection established
+2025-01-21T10:07:43.362Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:09:31.853Z [INFO]: Express app configured.
+2025-01-21T10:09:31.965Z [INFO]: SQLite database connected successfully.
+2025-01-21T10:09:32.023Z [INFO]: Database synced.
+2025-01-21T10:09:32.029Z [INFO]: Server running at http://localhost:4000
+2025-01-21T10:09:32.030Z [INFO]: WebSocket server running at ws://localhost:4000
+2025-01-21T10:09:32.340Z [INFO]: WebSocket connection established
+2025-01-21T10:09:32.362Z [INFO]: WebSocket connection from: ::ffff:127.0.0.1
+2025-01-21T10:09:46.020Z [INFO]: WebSocket connection closed
+2025-01-21T10:09:46.696Z [INFO]: WebSocket connection established
+2025-01-21T10:09:46.697Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:09:56.740Z [INFO]: WebSocket connection established
+2025-01-21T10:09:56.742Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:09:56.758Z [INFO]: WebSocket connection closed
+2025-01-21T10:09:56.787Z [INFO]: WebSocket connection established
+2025-01-21T10:09:56.788Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:09:56.841Z [INFO]: WebSocket connection established
+2025-01-21T10:09:56.852Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:09:58.344Z [INFO]: WebSocket connection closed
+2025-01-21T10:09:58.346Z [INFO]: WebSocket connection closed
+2025-01-21T10:09:59.736Z [INFO]: WebSocket connection established
+2025-01-21T10:09:59.736Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:09:59.750Z [INFO]: WebSocket connection established
+2025-01-21T10:09:59.750Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:10:01.363Z [INFO]: WebSocket connection established
+2025-01-21T10:10:01.364Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:10:01.381Z [INFO]: WebSocket connection established
+2025-01-21T10:10:01.381Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:13:27.621Z [INFO]: Express app configured.
+2025-01-21T10:13:27.736Z [INFO]: SQLite database connected successfully.
+2025-01-21T10:13:27.791Z [INFO]: Database synced.
+2025-01-21T10:13:27.798Z [INFO]: Server running at http://localhost:4000
+2025-01-21T10:13:27.799Z [INFO]: WebSocket server running at ws://localhost:4000
+2025-01-21T10:13:28.025Z [INFO]: WebSocket connection established
+2025-01-21T10:13:28.026Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:22:45.707Z [INFO]: Express app configured.
+2025-01-21T10:22:45.835Z [INFO]: SQLite database connected successfully.
+2025-01-21T10:22:45.875Z [INFO]: Database synced.
+2025-01-21T10:22:45.880Z [INFO]: Server running at http://localhost:4000
+2025-01-21T10:22:45.881Z [INFO]: WebSocket server running at ws://localhost:4000
+2025-01-21T10:22:46.453Z [INFO]: WebSocket connection established
+2025-01-21T10:22:46.453Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:22:46.896Z [INFO]: WebSocket connection established
+2025-01-21T10:22:46.897Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:22:46.929Z [INFO]: WebSocket connection established
+2025-01-21T10:22:46.929Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:22:46.971Z [INFO]: WebSocket connection established
+2025-01-21T10:22:46.978Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:22:46.980Z [INFO]: WebSocket connection closed
+2025-01-21T10:22:46.982Z [INFO]: WebSocket connection closed
+2025-01-21T10:22:46.992Z [INFO]: WebSocket connection established
+2025-01-21T10:22:46.993Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:22:49.945Z [INFO]: WebSocket connection established
+2025-01-21T10:22:49.946Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:22:49.962Z [INFO]: WebSocket connection established
+2025-01-21T10:22:49.964Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:22:50.698Z [INFO]: WebSocket connection closed
+2025-01-21T10:22:50.739Z [INFO]: WebSocket connection closed
+2025-01-21T10:22:53.701Z [INFO]: WebSocket connection established
+2025-01-21T10:22:53.701Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:22:53.714Z [INFO]: WebSocket connection established
+2025-01-21T10:22:53.715Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:23:54.017Z [INFO]: WebSocket connection closed
+2025-01-21T10:23:54.020Z [INFO]: WebSocket connection closed
+2025-01-21T10:23:54.021Z [INFO]: WebSocket connection closed
+2025-01-21T10:23:54.022Z [INFO]: WebSocket connection closed
+2025-01-21T10:23:54.022Z [INFO]: WebSocket connection closed
+2025-01-21T10:23:54.439Z [INFO]: WebSocket connection established
+2025-01-21T10:23:54.440Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:48.736Z [INFO]: Express app configured.
+2025-01-21T10:28:48.838Z [INFO]: SQLite database connected successfully.
+2025-01-21T10:28:48.876Z [INFO]: Database synced.
+2025-01-21T10:28:48.882Z [INFO]: Server running at http://localhost:4000
+2025-01-21T10:28:48.883Z [INFO]: WebSocket server running at ws://localhost:4000
+2025-01-21T10:28:49.660Z [INFO]: WebSocket connection established
+2025-01-21T10:28:49.661Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:49.927Z [INFO]: WebSocket connection established
+2025-01-21T10:28:49.950Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:50.244Z [INFO]: WebSocket connection established
+2025-01-21T10:28:50.245Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:50.271Z [INFO]: WebSocket connection established
+2025-01-21T10:28:50.275Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:50.296Z [INFO]: WebSocket connection closed
+2025-01-21T10:28:50.313Z [INFO]: WebSocket connection established
+2025-01-21T10:28:50.316Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:50.320Z [INFO]: WebSocket connection closed
+2025-01-21T10:28:50.330Z [INFO]: WebSocket connection established
+2025-01-21T10:28:50.331Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:50.442Z [INFO]: WebSocket connection closed
+2025-01-21T10:28:53.227Z [INFO]: WebSocket connection established
+2025-01-21T10:28:53.228Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:53.243Z [INFO]: WebSocket connection established
+2025-01-21T10:28:53.243Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:53.376Z [INFO]: WebSocket connection closed
+2025-01-21T10:28:53.377Z [INFO]: WebSocket connection closed
+2025-01-21T10:28:56.397Z [INFO]: WebSocket connection established
+2025-01-21T10:28:56.398Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:28:56.425Z [INFO]: WebSocket connection established
+2025-01-21T10:28:56.426Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:04.665Z [INFO]: Express app configured.
+2025-01-21T10:33:04.760Z [INFO]: SQLite database connected successfully.
+2025-01-21T10:33:04.808Z [INFO]: Database synced.
+2025-01-21T10:33:04.813Z [INFO]: Server running at http://localhost:4000
+2025-01-21T10:33:04.813Z [INFO]: WebSocket server running at ws://localhost:4000
+2025-01-21T10:33:04.971Z [INFO]: WebSocket connection established
+2025-01-21T10:33:04.972Z [INFO]: WebSocket connection from: ::ffff:127.0.0.1
+2025-01-21T10:33:04.975Z [INFO]: WebSocket connection established
+2025-01-21T10:33:04.976Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:04.996Z [INFO]: WebSocket connection established
+2025-01-21T10:33:04.996Z [INFO]: WebSocket connection from: ::ffff:127.0.0.1
+2025-01-21T10:33:05.998Z [INFO]: WebSocket connection established
+2025-01-21T10:33:05.999Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:08.000Z [INFO]: WebSocket connection established
+2025-01-21T10:33:08.000Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:10.623Z [INFO]: WebSocket connection closed
+2025-01-21T10:33:10.625Z [INFO]: WebSocket connection closed
+2025-01-21T10:33:10.626Z [INFO]: WebSocket connection closed
+2025-01-21T10:33:10.626Z [INFO]: WebSocket connection closed
+2025-01-21T10:33:10.627Z [INFO]: WebSocket connection closed
+2025-01-21T10:33:15.968Z [INFO]: WebSocket connection established
+2025-01-21T10:33:15.968Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:16.438Z [INFO]: WebSocket connection established
+2025-01-21T10:33:16.439Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:16.471Z [INFO]: WebSocket connection closed
+2025-01-21T10:33:16.486Z [INFO]: WebSocket connection established
+2025-01-21T10:33:16.487Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:16.501Z [INFO]: WebSocket connection established
+2025-01-21T10:33:16.502Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:17.585Z [INFO]: WebSocket connection closed
+2025-01-21T10:33:17.587Z [INFO]: WebSocket connection closed
+2025-01-21T10:33:19.449Z [INFO]: WebSocket connection established
+2025-01-21T10:33:19.450Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:19.461Z [INFO]: WebSocket connection established
+2025-01-21T10:33:19.462Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:20.623Z [INFO]: WebSocket connection established
+2025-01-21T10:33:20.623Z [INFO]: WebSocket connection from: ::1
+2025-01-21T10:33:20.650Z [INFO]: WebSocket connection established
+2025-01-21T10:33:20.651Z [INFO]: WebSocket connection from: ::1
