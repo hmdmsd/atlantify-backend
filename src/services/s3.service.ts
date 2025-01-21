@@ -4,10 +4,15 @@ import path from 'path';
 import { s3Config } from '../config/s3.config';
 import logger from '../utils/logger';
 
+interface S3Metadata {
+  [key: string]: string;
+}
+
 export class S3Service {
   private s3: AWS.S3;
 
   constructor() {
+    // Configure S3 client specifically for Garage
     this.s3 = new AWS.S3({
       endpoint: s3Config.endpoint,
       region: s3Config.region,
@@ -16,19 +21,16 @@ export class S3Service {
       s3ForcePathStyle: true,
       signatureVersion: 'v4',
       sslEnabled: true,
-      httpOptions: {
-        timeout: 0,
-      },
     });
   }
 
   async uploadFile(
     filePath: string,
     key: string,
+    metadata?: S3Metadata,
     onProgress?: (progress: number) => void
   ): Promise<string> {
     try {
-      // Read file from disk
       const fileStream = fs.createReadStream(filePath);
       const fileSize = fs.statSync(filePath).size;
       let uploadedBytes = 0;
@@ -38,7 +40,8 @@ export class S3Service {
         Key: `songs/${key}`,
         Body: fileStream,
         ContentType: this.getContentType(key),
-        ACL: 'public-read', // Ensure the file is publicly readable
+        ACL: 'private',
+        Metadata: metadata,
       };
 
       return new Promise((resolve, reject) => {
@@ -50,7 +53,6 @@ export class S3Service {
           resolve(data.Location);
         });
 
-        // Track upload progress
         fileStream.on('data', (chunk) => {
           uploadedBytes += chunk.length;
           if (onProgress) {
@@ -66,6 +68,25 @@ export class S3Service {
       });
     } catch (error) {
       logger.error('Upload File Error:', error);
+      throw error;
+    }
+  }
+
+  async getSignedUrl(key: string): Promise<string> {
+    try {
+      const params = {
+        Bucket: s3Config.bucket,
+        Key: key,
+        Expires: 3600, // 1 hour
+        ResponseContentType: this.getContentType(path.basename(key)),
+        ResponseContentDisposition: 'inline',
+      };
+
+      // Get signed URL with specific Garage configuration
+      const signedUrl = await this.s3.getSignedUrlPromise('getObject', params);
+      return signedUrl;
+    } catch (error) {
+      logger.error('Error generating signed URL:', error);
       throw error;
     }
   }
@@ -96,10 +117,5 @@ export class S3Service {
       default:
         return 'application/octet-stream';
     }
-  }
-
-  // Additional method to generate a public URL
-  getPublicUrl(key: string): string {
-    return `${s3Config.endpoint}/${s3Config.bucket}/${key}`;
   }
 }

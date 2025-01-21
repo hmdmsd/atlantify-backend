@@ -9,7 +9,16 @@ const app: Application = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+// Global CORS configuration
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
+    exposedHeaders: ['Content-Range', 'Content-Length', 'Accept-Ranges'],
+  })
+);
 app.use(express.json());
 
 // Routes

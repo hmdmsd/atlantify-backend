@@ -4,7 +4,6 @@ import path from 'path';
 import { SongsService } from '../services/songs.service';
 import { S3Service } from '../services/s3.service';
 import logger from '../utils/logger';
-import * as mm from 'music-metadata';
 import { UploadedRequest } from '../middleware/upload.middleware';
 
 export class SongsController {
@@ -19,12 +18,53 @@ export class SongsController {
   async listSongs(req: Request, res: Response): Promise<void> {
     try {
       const songs = await this.songsService.listSongs();
-      res.status(200).json({ success: true, songs });
+
+      // Get signed URLs for all songs
+      const songsWithUrls = await Promise.all(
+        songs.map(async (song) => ({
+          ...song.toJSON(),
+          publicUrl: await this.s3Service.getSignedUrl(song.path),
+        }))
+      );
+
+      res.status(200).json({ success: true, songs: songsWithUrls });
     } catch (error) {
       logger.error('Error listing songs:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to retrieve songs',
+      });
+    }
+  }
+
+  async getSongDetails(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const song = await this.songsService.getSongDetails(id);
+
+      if (!song) {
+        res.status(404).json({
+          success: false,
+          message: 'Song not found',
+        });
+        return;
+      }
+
+      // Generate a signed URL that expires in 1 hour
+      const signedUrl = await this.s3Service.getSignedUrl(song.path);
+
+      res.status(200).json({
+        success: true,
+        song: {
+          ...song.toJSON(),
+          publicUrl: signedUrl,
+        },
+      });
+    } catch (error) {
+      logger.error('Error retrieving song details:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve song details',
       });
     }
   }
@@ -42,9 +82,6 @@ export class SongsController {
 
       filePath = file.path;
 
-      // Fallback duration calculation
-      const duration = this.estimateDuration(file.size);
-
       // Sanitize filename
       const sanitizedFilename =
         `${artist}-${title}`.toLowerCase().replace(/[^a-z0-9-]/g, '-') +
@@ -52,11 +89,20 @@ export class SongsController {
 
       const s3Key = `songs/${sanitizedFilename}`;
 
-      // Upload to S3
+      // Upload to S3 with proper metadata
       const s3Url = await this.s3Service.uploadFile(
         filePath,
-        sanitizedFilename
+        sanitizedFilename,
+        {
+          'Content-Type': file.mimetype,
+          'x-amz-meta-title': title,
+          'x-amz-meta-artist': artist,
+          'x-amz-meta-uploadedBy': userId,
+        }
       );
+
+      // Calculate duration
+      const duration = this.estimateDuration(file.size);
 
       // Create song entry in database
       const song = await this.songsService.createSong({
@@ -64,35 +110,31 @@ export class SongsController {
         artist,
         path: s3Key,
         size: file.size,
-        duration: duration,
+        duration,
         uploadedBy: userId,
       });
 
-      // Always try to delete local file
-      try {
+      // Get signed URL
+      const signedUrl = await this.s3Service.getSignedUrl(s3Key);
+
+      // Clean up local file
+      if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
-      } catch (cleanupError) {
-        logger.error('Error cleaning up local file:', cleanupError);
       }
 
       res.status(201).json({
         success: true,
-        song,
-        uploadUrl: s3Url,
+        song: {
+          ...song.toJSON(),
+          publicUrl: signedUrl,
+        },
       });
     } catch (error) {
-      // If local file exists, try to delete it
       if (filePath && fs.existsSync(filePath)) {
-        try {
-          fs.unlinkSync(filePath);
-        } catch (cleanupError) {
-          logger.error('Error cleaning up local file:', cleanupError);
-        }
+        fs.unlinkSync(filePath);
       }
 
       logger.error('Error uploading song:', error);
-
-      // More detailed error response
       res.status(500).json({
         success: false,
         message:
@@ -101,17 +143,7 @@ export class SongsController {
     }
   }
 
-  // Simple duration estimation based on file size
-  private estimateDuration(fileSize: number): number {
-    // Rough estimate: assume 1 MB = ~3 minutes for MP3
-    // This is a very rough approximation and should be replaced with proper audio duration detection
-    const estimatedDurationInSeconds = Math.round(
-      (fileSize / (1024 * 1024)) * 3 * 60
-    );
-    return Math.max(0, estimatedDurationInSeconds);
-  }
-
-  async getSongDetails(req: Request, res: Response): Promise<void> {
+  async streamSong(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const song = await this.songsService.getSongDetails(id);
@@ -124,21 +156,25 @@ export class SongsController {
         return;
       }
 
-      res.status(200).json({
-        success: true,
-        song: {
-          ...song.toJSON(),
-          // Generate public URL
-          publicUrl: this.s3Service.getPublicUrl(song.path),
-        },
-      });
+      // Get a signed URL for the song
+      const signedUrl = await this.s3Service.getSignedUrl(song.path);
+
+      // Redirect to the signed URL
+      res.redirect(signedUrl);
     } catch (error) {
-      logger.error('Error retrieving song details:', error);
+      logger.error('Error streaming song:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to retrieve song details',
+        message: 'Failed to stream song',
       });
     }
+  }
+
+  private estimateDuration(fileSize: number): number {
+    const estimatedDurationInSeconds = Math.round(
+      (fileSize / (1024 * 1024)) * 3 * 60
+    );
+    return Math.max(0, estimatedDurationInSeconds);
   }
 
   async deleteSong(req: Request, res: Response): Promise<void> {
@@ -163,10 +199,7 @@ export class SongsController {
         return;
       }
 
-      // Delete from S3
       await this.s3Service.deleteFile(song.path);
-
-      // Delete from database
       await this.songsService.deleteSong(id, userId);
 
       res.status(200).json({
