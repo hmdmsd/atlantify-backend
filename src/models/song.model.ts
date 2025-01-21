@@ -6,6 +6,7 @@ export class SongModel extends Model {
   public title!: string;
   public artist!: string;
   public path!: string;
+  public publicUrl?: string;
   public size!: number;
   public duration!: number;
   public uploadedBy!: string;
@@ -32,6 +33,10 @@ SongModel.init(
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+    },
+    publicUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     size: {
       type: DataTypes.INTEGER,

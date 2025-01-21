@@ -46,35 +46,25 @@ async function seedDatabase() {
     // Create songs
     const song1Id = uuidv4();
     const song2Id = uuidv4();
-    const song3Id = uuidv4();
 
     await SongModel.bulkCreate([
       {
         id: song1Id,
-        title: 'Bohemian Rhapsody',
-        artist: 'Queen',
+        title: 'starboy',
+        artist: 'the weekend',
         duration: 354,
-        path: '/music/bohemian-rhapsody.mp3',
+        path: 'songs/the-weekend-starboy.mp3',
         uploadedBy: adminId,
         size: 8400000,
       },
       {
         id: song2Id,
-        title: 'Hotel California',
-        artist: 'Eagles',
+        title: 'a sky full of stars',
+        artist: 'coldplay',
         duration: 391,
-        path: '/music/hotel-california.mp3',
+        path: 'songs/coldplay-a-sky-full-of-stars.mp3',
         uploadedBy: adminId,
         size: 7800000,
-      },
-      {
-        id: song3Id,
-        title: 'Sweet Child O Mine',
-        artist: 'Guns N Roses',
-        duration: 356,
-        path: '/music/sweet-child-o-mine.mp3',
-        uploadedBy: userId1,
-        size: 8100000,
       },
     ]);
 

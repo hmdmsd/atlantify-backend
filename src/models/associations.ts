@@ -1,6 +1,7 @@
-// src/models/associations.ts
-import { SuggestionModel } from './suggestion.model';
+import { SongModel } from './song.model';
 import { UserModel } from './user.model';
+import { QueueModel } from './queue.model';
+import { SuggestionModel } from './suggestion.model';
 import { VoteModel } from './vote.model';
 
 export function initializeAssociations() {
@@ -13,6 +14,29 @@ export function initializeAssociations() {
   UserModel.hasMany(VoteModel, {
     foreignKey: 'userId',
     as: 'votes',
+  });
+
+  // Queue-specific user associations
+  UserModel.hasMany(QueueModel, {
+    foreignKey: 'addedBy',
+    as: 'queuedItems',
+  });
+
+  // Queue associations
+  QueueModel.belongsTo(UserModel, {
+    foreignKey: 'addedBy',
+    as: 'addedByUser',
+  });
+
+  QueueModel.belongsTo(SongModel, {
+    foreignKey: 'songId',
+    as: 'queueSong',
+  });
+
+  // Song associations
+  SongModel.hasMany(QueueModel, {
+    foreignKey: 'songId',
+    as: 'queueEntries',
   });
 
   // Suggestion associations

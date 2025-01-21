@@ -7,6 +7,7 @@ declare module 'express' {
       id: string;
       username: string;
       email: string;
+      role: string;
       createdAt: string;
       updatedAt: string;
     };
@@ -133,13 +134,14 @@ export class AuthController {
         return;
       }
 
-      // Return user data without sensitive information
+      // Return full user data including role
       res.status(200).json({
         success: true,
         user: {
           id: user.id,
           username: user.username,
           email: user.email,
+          role: user.role,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         },

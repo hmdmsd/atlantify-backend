@@ -1,23 +1,42 @@
 import { Router } from 'express';
 import { RadioController } from '../controllers/radio.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
+import { adminMiddleware } from '../middleware/admin.middleware';
 
 const router = Router();
 const radioController = new RadioController();
 
-// Add authentication middleware
-router.use(authMiddleware);
+// Public routes (all authenticated users can access)
+router.get('/queue', authMiddleware, radioController.getQueue);
+router.get('/songs', authMiddleware, radioController.searchSongs);
 
-// Get current queue
-router.get('/queue', radioController.getQueue);
+// Admin-only routes
+router.post(
+  '/queue',
+  authMiddleware,
+  adminMiddleware,
+  radioController.addToQueue
+);
 
-// Add song to queue
-router.post('/queue', radioController.addToQueue);
+router.delete(
+  '/queue/:id',
+  authMiddleware,
+  adminMiddleware,
+  radioController.removeFromQueue
+);
 
-// Remove song from queue
-router.delete('/queue/:id', radioController.removeFromQueue);
+router.post(
+  '/skip',
+  authMiddleware,
+  adminMiddleware,
+  radioController.skipTrack
+);
 
-// Skip current track
-router.post('/skip', radioController.skipTrack);
+router.post(
+  '/toggle',
+  authMiddleware,
+  adminMiddleware,
+  radioController.toggleRadioStatus
+);
 
 export default router;
