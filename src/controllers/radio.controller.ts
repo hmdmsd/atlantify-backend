@@ -1,13 +1,17 @@
 import { Request, Response } from 'express';
 import { radioService } from '../services/radio.service';
 import { SongModel } from '../models/song.model';
+import { S3Service } from '../services/s3.service';
 import logger from '../utils/logger';
 import { Op } from 'sequelize';
 
 export class RadioController {
-  /**
-   * Get current radio queue state
-   */
+  private s3Service: S3Service;
+
+  constructor() {
+    this.s3Service = new S3Service();
+  }
+
   async getQueue(req: Request, res: Response): Promise<void> {
     try {
       const queueState = radioService.getCurrentQueue();
@@ -24,9 +28,6 @@ export class RadioController {
     }
   }
 
-  /**
-   * Add a song to the radio queue (Admin only)
-   */
   async addToQueue(req: Request, res: Response): Promise<void> {
     try {
       const { songId } = req.body;
@@ -48,7 +49,6 @@ export class RadioController {
     } catch (error) {
       logger.error('Error adding to queue:', error);
 
-      // Check for specific error types
       if (error.message === 'Only admin can add tracks to the queue') {
         res.status(403).json({
           success: false,
@@ -64,9 +64,6 @@ export class RadioController {
     }
   }
 
-  /**
-   * Remove a song from the radio queue (Admin only)
-   */
   async removeFromQueue(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
@@ -96,7 +93,6 @@ export class RadioController {
     } catch (error) {
       logger.error('Error removing from queue:', error);
 
-      // Check for specific error types
       if (error.message === 'Only admin can remove tracks from the queue') {
         res.status(403).json({
           success: false,
@@ -112,9 +108,6 @@ export class RadioController {
     }
   }
 
-  /**
-   * Skip current track in the radio queue (Admin only)
-   */
   async skipTrack(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
@@ -135,7 +128,6 @@ export class RadioController {
     } catch (error) {
       logger.error('Error skipping track:', error);
 
-      // Check for specific error types
       if (error.message === 'Only admin can skip tracks') {
         res.status(403).json({
           success: false,
@@ -151,9 +143,6 @@ export class RadioController {
     }
   }
 
-  /**
-   * Toggle radio status (start/stop) - Admin only
-   */
   async toggleRadioStatus(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
@@ -175,7 +164,6 @@ export class RadioController {
     } catch (error) {
       logger.error('Error toggling radio status:', error);
 
-      // Check for specific error types
       if (error.message === 'Only admin can toggle radio status') {
         res.status(403).json({
           success: false,
@@ -191,14 +179,10 @@ export class RadioController {
     }
   }
 
-  /**
-   * Search songs for adding to queue
-   */
   async searchSongs(req: Request, res: Response): Promise<void> {
     try {
       const { search } = req.query;
 
-      // If no search term, return all songs
       const whereClause = search
         ? {
             [Op.or]: [
@@ -210,14 +194,22 @@ export class RadioController {
 
       const songs = await SongModel.findAll({
         where: whereClause,
-        attributes: ['id', 'title', 'artist', 'duration', 'publicUrl'],
-        limit: 50, // Limit to prevent overwhelming results
+        attributes: ['id', 'title', 'artist', 'duration', 'path'],
+        limit: 50,
         order: [['createdAt', 'DESC']],
       });
 
+      // Get signed URLs for all songs
+      const songsWithUrls = await Promise.all(
+        songs.map(async (song) => ({
+          ...song.toJSON(),
+          url: await this.s3Service.getSignedUrl(song.path),
+        }))
+      );
+
       res.status(200).json({
         success: true,
-        songs,
+        songs: songsWithUrls,
       });
     } catch (error) {
       logger.error('Error searching songs:', error);

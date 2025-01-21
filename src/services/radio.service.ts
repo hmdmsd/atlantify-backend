@@ -4,6 +4,8 @@ import { QueueModel } from '../models/queue.model';
 import { SongModel } from '../models/song.model';
 import { UserModel } from '../models/user.model';
 import { WebSocket } from 'ws';
+import { S3Service } from './s3.service';
+import logger from '../utils/logger';
 
 interface Track {
   id: string;
@@ -36,6 +38,7 @@ interface QueueUpdateEvent {
 
 class RadioService extends EventEmitter {
   private static instance: RadioService;
+  private s3Service: S3Service;
   private queueState: QueueState = {
     currentTrack: null,
     queue: [],
@@ -47,11 +50,17 @@ class RadioService extends EventEmitter {
 
   private constructor() {
     super();
+    this.s3Service = new S3Service();
     this.initializeQueue = this.initializeQueue.bind(this);
     this.broadcastUpdate = this.broadcastUpdate.bind(this);
     this.startRadioPlayback = this.startRadioPlayback.bind(this);
     this.stopRadioPlayback = this.stopRadioPlayback.bind(this);
     this.advanceToNextTrack = this.advanceToNextTrack.bind(this);
+
+    // Initialize queue when service starts
+    this.initializeQueue().catch((error) => {
+      logger.error('Failed to initialize queue:', error);
+    });
   }
 
   public static getInstance(): RadioService {
@@ -61,18 +70,102 @@ class RadioService extends EventEmitter {
     return RadioService.instance;
   }
 
-  private generateTrackUrl(song: SongModel): string {
-    return song.publicUrl || song.path;
+  private async generateSignedUrl(song: SongModel): Promise<string> {
+    try {
+      return await this.s3Service.getSignedUrl(song.path);
+    } catch (error) {
+      logger.error('Error generating signed URL:', error);
+      throw error;
+    }
   }
 
-  // Broadcast update method
+  private async transformQueueItem(queueItem: QueueModel): Promise<Track> {
+    try {
+      const signedUrl = await this.generateSignedUrl(queueItem.queueSong);
+
+      return {
+        id: queueItem.id,
+        title: queueItem.queueSong.title,
+        artist: queueItem.queueSong.artist,
+        url: signedUrl,
+        duration: queueItem.queueSong.duration,
+        addedBy: {
+          id: queueItem.addedByUser.id,
+          username: queueItem.addedByUser.username,
+        },
+        addedAt: queueItem.createdAt.toISOString(),
+      };
+    } catch (error) {
+      logger.error('Error transforming queue item:', error);
+      throw error;
+    }
+  }
+
   private broadcastUpdate(update: QueueUpdateEvent): void {
     const message = JSON.stringify(update);
     this.wsClients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
+        try {
+          client.send(message);
+        } catch (error) {
+          logger.error('Error broadcasting to client:', error);
+          // Remove problematic client
+          this.wsClients.delete(client);
+        }
       }
     });
+  }
+
+  private async refreshTrackUrls(): Promise<void> {
+    try {
+      // Refresh URLs for all tracks in queue
+      const updatedQueue = await Promise.all(
+        this.queueState.queue.map(async (track) => {
+          const queueItem = await QueueModel.findByPk(track.id, {
+            include: [
+              {
+                model: SongModel,
+                as: 'queueSong',
+              },
+              {
+                model: UserModel,
+                as: 'addedByUser',
+              },
+            ],
+          });
+          return queueItem ? await this.transformQueueItem(queueItem) : track;
+        })
+      );
+
+      this.queueState.queue = updatedQueue;
+
+      // Refresh current track URL if exists
+      if (this.queueState.currentTrack) {
+        const currentQueueItem = await QueueModel.findByPk(
+          this.queueState.currentTrack.id,
+          {
+            include: [
+              {
+                model: SongModel,
+                as: 'queueSong',
+              },
+              {
+                model: UserModel,
+                as: 'addedByUser',
+              },
+            ],
+          }
+        );
+
+        if (currentQueueItem) {
+          this.queueState.currentTrack =
+            await this.transformQueueItem(currentQueueItem);
+        }
+      }
+    } catch (error) {
+      logger.error('Error refreshing track URLs:', error);
+      throw error;
+    }
   }
 
   private async initializeQueue() {
@@ -83,14 +176,7 @@ class RadioService extends EventEmitter {
           {
             model: SongModel,
             as: 'queueSong',
-            attributes: [
-              'id',
-              'title',
-              'artist',
-              'path',
-              'publicUrl',
-              'duration',
-            ],
+            attributes: ['id', 'title', 'artist', 'path', 'duration'],
           },
           {
             model: UserModel,
@@ -100,51 +186,63 @@ class RadioService extends EventEmitter {
         ],
       });
 
-      // Transform queue items into Track format
-      this.queueState.queue = queueItems.map((item) => ({
-        id: item.id,
-        title: item.queueSong.title,
-        artist: item.queueSong.artist,
-        url: this.generateTrackUrl(item.queueSong),
-        duration: item.queueSong.duration,
-        addedBy: {
-          id: item.addedByUser.id,
-          username: item.addedByUser.username,
-        },
-        addedAt: item.createdAt.toISOString(),
-      }));
+      // Transform queue items with signed URLs
+      this.queueState.queue = await Promise.all(
+        queueItems.map((item) => this.transformQueueItem(item))
+      );
 
-      // Set current track if queue is not empty
       if (this.queueState.queue.length > 0) {
         this.queueState.currentTrack = this.queueState.queue[0];
       }
+
+      // Start playback if radio is active
+      if (this.queueState.isRadioActive) {
+        this.startRadioPlayback();
+      }
     } catch (error) {
-      console.error('Failed to initialize queue:', error);
+      logger.error('Failed to initialize queue:', error);
+      throw error;
     }
   }
 
   private startRadioPlayback() {
-    // Stop any existing playback timer
     this.stopRadioPlayback();
 
-    // Ensure we have tracks and radio is active
     if (this.queueState.queue.length === 0 || !this.queueState.isRadioActive) {
       return;
     }
 
-    // If no current track, start from the first track
     if (!this.queueState.currentTrack) {
       this.queueState.currentTrack = this.queueState.queue[0];
     }
 
-    // Start playback timer for the current track's full duration
     if (this.queueState.currentTrack) {
+      // Set timer for track duration
       this.trackPlaybackTimer = setTimeout(
         this.advanceToNextTrack,
         this.queueState.currentTrack.duration * 1000
       );
 
-      // Broadcast track change
+      // Refresh URLs every 50 minutes (before the 1-hour expiration)
+      setInterval(
+        async () => {
+          try {
+            await this.refreshTrackUrls();
+            this.broadcastUpdate({
+              type: 'QUEUE_UPDATE',
+              data: {
+                currentTrack: this.queueState.currentTrack,
+                queue: this.queueState.queue,
+              },
+            });
+          } catch (error) {
+            logger.error('Error refreshing URLs:', error);
+          }
+        },
+        50 * 60 * 1000
+      );
+
+      // Broadcast current track
       this.broadcastUpdate({
         type: 'TRACK_CHANGE',
         data: {
@@ -162,205 +260,196 @@ class RadioService extends EventEmitter {
     }
   }
 
-  private advanceToNextTrack() {
-    // Ensure we have tracks in the queue
-    if (this.queueState.queue.length === 0) {
-      this.queueState.currentTrack = null;
-      return;
+  private async advanceToNextTrack() {
+    try {
+      if (this.queueState.queue.length === 0) {
+        this.queueState.currentTrack = null;
+        return;
+      }
+
+      // Remove current track from queue and database
+      if (this.queueState.currentTrack) {
+        await QueueModel.destroy({
+          where: { id: this.queueState.currentTrack.id },
+        });
+      }
+
+      this.queueState.queue.shift();
+
+      if (this.queueState.queue.length === 0) {
+        this.queueState.currentTrack = null;
+        this.stopRadioPlayback();
+        return;
+      }
+
+      // Update track URLs and start playback
+      await this.refreshTrackUrls();
+      this.queueState.currentTrack = this.queueState.queue[0];
+      this.startRadioPlayback();
+
+      // Broadcast updates
+      this.broadcastUpdate({
+        type: 'TRACK_CHANGE',
+        data: {
+          currentTrack: this.queueState.currentTrack,
+          queue: this.queueState.queue,
+        },
+      });
+    } catch (error) {
+      logger.error('Error advancing to next track:', error);
+      throw error;
     }
-
-    // Remove the first track from the queue
-    this.queueState.queue.shift();
-
-    // If queue is empty after removal, reset current track
-    if (this.queueState.queue.length === 0) {
-      this.queueState.currentTrack = null;
-      this.stopRadioPlayback();
-      return;
-    }
-
-    // Set the next track as current
-    this.queueState.currentTrack = this.queueState.queue[0];
-
-    // Restart playback for the new track
-    this.startRadioPlayback();
   }
 
   public async toggleRadioStatus(userId: string): Promise<boolean> {
-    // Verify user is admin
-    const user = await UserModel.findByPk(userId);
-    if (!user || user.role !== 'admin') {
-      throw new Error('Only admin can toggle radio status');
+    try {
+      const user = await UserModel.findByPk(userId);
+      if (!user || user.role !== 'admin') {
+        throw new Error('Only admin can toggle radio status');
+      }
+
+      this.queueState.isRadioActive = !this.queueState.isRadioActive;
+
+      if (this.queueState.isRadioActive) {
+        await this.refreshTrackUrls();
+        this.startRadioPlayback();
+      } else {
+        this.stopRadioPlayback();
+      }
+
+      this.broadcastUpdate({
+        type: 'RADIO_STATUS_CHANGE',
+        data: {
+          isRadioActive: this.queueState.isRadioActive,
+          currentTrack: this.queueState.currentTrack,
+        },
+      });
+
+      return this.queueState.isRadioActive;
+    } catch (error) {
+      logger.error('Error toggling radio status:', error);
+      throw error;
     }
-
-    // Toggle radio status
-    this.queueState.isRadioActive = !this.queueState.isRadioActive;
-
-    if (this.queueState.isRadioActive) {
-      this.startRadioPlayback();
-    } else {
-      this.stopRadioPlayback();
-    }
-
-    // Broadcast radio status change
-    this.broadcastUpdate({
-      type: 'RADIO_STATUS_CHANGE',
-      data: {
-        isRadioActive: this.queueState.isRadioActive,
-        currentTrack: this.queueState.currentTrack,
-      },
-    });
-
-    return this.queueState.isRadioActive;
   }
+
   public async addToQueue(songId: string, userId: string): Promise<QueueModel> {
-    // Verify user is admin
-    const user = await UserModel.findByPk(userId);
-    if (!user || user.role !== 'admin') {
-      throw new Error('Only admin can add tracks to the queue');
+    try {
+      const user = await UserModel.findByPk(userId);
+      if (!user || user.role !== 'admin') {
+        throw new Error('Only admin can add tracks to the queue');
+      }
+
+      const song = await SongModel.findByPk(songId);
+      if (!song) {
+        throw new Error('Song not found');
+      }
+
+      const lastPosition = (await QueueModel.max('position')) || 0;
+
+      const queueItem = await QueueModel.create({
+        songId,
+        addedBy: userId,
+        position: lastPosition + 1,
+      });
+
+      const fullQueueItem = await QueueModel.findByPk(queueItem.id, {
+        include: [
+          {
+            model: SongModel,
+            as: 'queueSong',
+          },
+          {
+            model: UserModel,
+            as: 'addedByUser',
+          },
+        ],
+      });
+
+      const newTrack = await this.transformQueueItem(fullQueueItem);
+      this.queueState.queue.push(newTrack);
+
+      this.broadcastUpdate({
+        type: 'QUEUE_UPDATE',
+        data: { queue: this.queueState.queue },
+      });
+
+      return queueItem;
+    } catch (error) {
+      logger.error('Error adding to queue:', error);
+      throw error;
     }
-
-    const song = await SongModel.findByPk(songId);
-    if (!song) {
-      throw new Error('Song not found');
-    }
-
-    // Calculate next position
-    const lastPosition = (await QueueModel.max('position')) || 0;
-
-    const queueItem = await QueueModel.create({
-      songId,
-      addedBy: userId,
-      position: lastPosition + 1,
-    });
-
-    // Fetch the full queue item with associations
-    const fullQueueItem = await QueueModel.findByPk(queueItem.id, {
-      include: [
-        {
-          model: SongModel,
-          as: 'queueSong',
-          attributes: [
-            'id',
-            'title',
-            'artist',
-            'path',
-            'publicUrl',
-            'duration',
-          ],
-        },
-        {
-          model: UserModel,
-          as: 'addedByUser',
-          attributes: ['id', 'username'],
-        },
-      ],
-    });
-
-    // Transform to Track format
-    const newTrack = {
-      id: fullQueueItem.id,
-      title: fullQueueItem.queueSong.title,
-      artist: fullQueueItem.queueSong.artist,
-      url: this.generateTrackUrl(fullQueueItem.queueSong),
-      duration: fullQueueItem.queueSong.duration,
-      addedBy: {
-        id: fullQueueItem.addedByUser.id,
-        username: fullQueueItem.addedByUser.username,
-      },
-      addedAt: fullQueueItem.createdAt.toISOString(),
-    };
-
-    // Update local queue state
-    this.queueState.queue.push(newTrack);
-
-    // Broadcast update
-    this.broadcastUpdate({
-      type: 'QUEUE_UPDATE',
-      data: { queue: this.queueState.queue },
-    });
-
-    return queueItem;
   }
 
   public async removeFromQueue(
     queueId: string,
     userId: string
   ): Promise<boolean> {
-    // Verify user is admin
-    const user = await UserModel.findByPk(userId);
-    if (!user || user.role !== 'admin') {
-      throw new Error('Only admin can remove tracks from the queue');
+    try {
+      const user = await UserModel.findByPk(userId);
+      if (!user || user.role !== 'admin') {
+        throw new Error('Only admin can remove tracks from the queue');
+      }
+
+      const queueItem = await QueueModel.findByPk(queueId);
+      if (!queueItem) return false;
+
+      await queueItem.destroy();
+
+      this.queueState.queue = this.queueState.queue.filter(
+        (item) => item.id !== queueId
+      );
+
+      this.broadcastUpdate({
+        type: 'QUEUE_UPDATE',
+        data: { queue: this.queueState.queue },
+      });
+
+      return true;
+    } catch (error) {
+      logger.error('Error removing from queue:', error);
+      throw error;
     }
-
-    const queueItem = await QueueModel.findByPk(queueId);
-    if (!queueItem) return false;
-
-    await queueItem.destroy();
-
-    // Remove from local queue state
-    this.queueState.queue = this.queueState.queue.filter(
-      (item) => item.id !== queueId
-    );
-
-    // Reorder remaining queue items
-    this.queueState.queue.forEach((item, index) => {
-      // In a real-world scenario, you'd update the database position here
-    });
-
-    // Broadcast update
-    this.broadcastUpdate({
-      type: 'QUEUE_UPDATE',
-      data: { queue: this.queueState.queue },
-    });
-
-    return true;
   }
 
   public async skipCurrentTrack(userId: string): Promise<void> {
-    // Verify user is admin
-    const user = await UserModel.findByPk(userId);
-    if (!user || user.role !== 'admin') {
-      throw new Error('Only admin can skip tracks');
+    try {
+      const user = await UserModel.findByPk(userId);
+      if (!user || user.role !== 'admin') {
+        throw new Error('Only admin can skip tracks');
+      }
+
+      if (this.queueState.queue.length === 0) {
+        throw new Error('No tracks in queue');
+      }
+
+      // Stop current playback
+      this.stopRadioPlayback();
+      await this.advanceToNextTrack();
+    } catch (error) {
+      logger.error('Error skipping track:', error);
+      throw error;
     }
-
-    if (this.queueState.queue.length === 0) {
-      throw new Error('No tracks in queue');
-    }
-
-    // Remove current track from database and queue
-    if (this.queueState.currentTrack) {
-      await QueueModel.destroy({
-        where: { id: this.queueState.currentTrack.id },
-      });
-    }
-
-    // Remove from local queue
-    this.queueState.queue.shift();
-
-    // Set next track as current
-    this.queueState.currentTrack = this.queueState.queue[0] || null;
-
-    // Broadcast track change
-    this.broadcastUpdate({
-      type: 'TRACK_CHANGE',
-      data: {
-        currentTrack: this.queueState.currentTrack,
-        queue: this.queueState.queue,
-      },
-    });
   }
 
   public getCurrentQueue(): QueueState {
     return { ...this.queueState };
   }
 
-  // Method to add WebSocket clients
   public addWebSocketClient(ws: WebSocket) {
     this.wsClients.add(ws);
-
-    // Increment listeners
     this.queueState.listeners++;
+
+    // Send initial state to new client
+    try {
+      ws.send(
+        JSON.stringify({
+          type: 'QUEUE_UPDATE',
+          data: this.queueState,
+        })
+      );
+    } catch (error) {
+      logger.error('Error sending initial state to client:', error);
+    }
 
     // Broadcast listeners update
     this.broadcastUpdate({
@@ -368,14 +457,10 @@ class RadioService extends EventEmitter {
       data: { listeners: this.queueState.listeners },
     });
 
-    // Remove client on close
     ws.on('close', () => {
       this.wsClients.delete(ws);
-
-      // Decrement listeners
       this.queueState.listeners--;
 
-      // Broadcast listeners update
       this.broadcastUpdate({
         type: 'LISTENERS_UPDATE',
         data: { listeners: this.queueState.listeners },
