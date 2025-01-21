@@ -746,3 +746,7 @@
 2025-01-21T13:22:06.060Z [ERROR]: Error adding to queue: radio_service_1.radioService.addToQueue is not a function
 2025-01-21T13:22:06.066Z [ERROR]: Error adding to queue: radio_service_1.radioService.addToQueue is not a function
 2025-01-21T13:22:06.072Z [ERROR]: Error adding to queue: radio_service_1.radioService.addToQueue is not a function
+2025-01-21T14:26:21.733Z [ERROR]: Error skipping track: No tracks in queue
+2025-01-21T14:26:21.734Z [ERROR]: Error skipping track: No tracks in queue
+2025-01-21T14:30:47.404Z [ERROR]: S3 Upload Error: Inaccessible host: `garage.deuxfleurs.fr' at port `undefined'. This service may not be available in the `garage' region.
+2025-01-21T14:30:47.406Z [ERROR]: Error uploading song: Inaccessible host: `garage.deuxfleurs.fr' at port `undefined'. This service may not be available in the `garage' region.

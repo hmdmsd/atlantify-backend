@@ -2,6 +2,15 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { jwtConfig } from '../config/jwt.config';
 
+// Extend Express Request type to include user property
+declare global {
+  namespace Express {
+    interface Request {
+      user?: JwtUserPayload;
+    }
+  }
+}
+
 interface JwtUserPayload {
   id: string;
   username: string;
@@ -11,20 +20,21 @@ interface JwtUserPayload {
   updatedAt: string;
 }
 
-export const authMiddleware = async (
+export const authMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): void => {
   try {
     // Get token from header
     const authHeader = req.headers.authorization;
     console.log('Auth header:', authHeader); // Debug log
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res
+      res
         .status(401)
         .json({ success: false, message: 'Authorization token is required.' });
+      return;
     }
 
     const token = authHeader.split(' ')[1];
@@ -47,14 +57,14 @@ export const authMiddleware = async (
       next();
     } catch (jwtError) {
       console.error('JWT verification failed:', jwtError);
-      return res
+      res
         .status(401)
         .json({ success: false, message: 'Invalid or expired token.' });
+      return;
     }
   } catch (error) {
     console.error('Auth middleware error:', error);
-    return res
-      .status(500)
-      .json({ success: false, message: 'Internal server error.' });
+    res.status(500).json({ success: false, message: 'Internal server error.' });
+    return;
   }
 };

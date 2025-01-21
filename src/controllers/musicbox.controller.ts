@@ -115,7 +115,6 @@ export class MusicBoxController {
           title: suggestion.title,
           artist: suggestion.artist,
           suggestedBy: suggestion.suggestedBy,
-          votes: suggestion.votes,
           status: suggestion.status,
           createdAt: suggestion.createdAt,
           updatedAt: suggestion.updatedAt,

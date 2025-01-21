@@ -27,8 +27,11 @@ router.get('/stream/:id', streamingCors, (req, res) =>
 
 // Regular routes
 router.get('/', (req, res) => songsController.listSongs(req, res));
-router.post('/upload', upload.single('song'), validateFileUpload, (req, res) =>
-  songsController.uploadSong(req, res)
+router.post(
+  '/upload',
+  upload.single('song'),
+  validateFileUpload,
+  (req: any, res: any) => songsController.uploadSong(req, res)
 );
 router.get('/:id', (req, res) => songsController.getSongDetails(req, res));
 router.delete('/:id', (req, res) => songsController.deleteSong(req, res));

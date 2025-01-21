@@ -46,7 +46,7 @@ export class RadioController {
         success: true,
         queueItem,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error adding to queue:', error);
 
       if (error.message === 'Only admin can add tracks to the queue') {
@@ -90,7 +90,7 @@ export class RadioController {
         success: true,
         message: 'Item removed from queue',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error removing from queue:', error);
 
       if (error.message === 'Only admin can remove tracks from the queue') {
@@ -125,7 +125,7 @@ export class RadioController {
         success: true,
         message: 'Track skipped successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error skipping track:', error);
 
       if (error.message === 'Only admin can skip tracks') {
@@ -161,7 +161,7 @@ export class RadioController {
         isRadioActive,
         message: isRadioActive ? 'Radio started' : 'Radio stopped',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error toggling radio status:', error);
 
       if (error.message === 'Only admin can toggle radio status') {

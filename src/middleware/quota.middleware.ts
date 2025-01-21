@@ -10,7 +10,7 @@ export const quotaMiddleware = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.user?.sub as string; // User ID from auth middleware
+    const userId = req.user?.id as string; // User ID from auth middleware
 
     if (!userId) {
       res

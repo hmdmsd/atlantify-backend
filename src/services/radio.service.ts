@@ -57,7 +57,6 @@ class RadioService extends EventEmitter {
     this.stopRadioPlayback = this.stopRadioPlayback.bind(this);
     this.advanceToNextTrack = this.advanceToNextTrack.bind(this);
 
-    // Initialize queue when service starts
     this.initializeQueue().catch((error) => {
       logger.error('Failed to initialize queue:', error);
     });
@@ -79,7 +78,12 @@ class RadioService extends EventEmitter {
     }
   }
 
-  private async transformQueueItem(queueItem: QueueModel): Promise<Track> {
+  private async transformQueueItem(
+    queueItem: QueueModel & {
+      queueSong: SongModel;
+      addedByUser: UserModel;
+    }
+  ): Promise<Track> {
     try {
       const signedUrl = await this.generateSignedUrl(queueItem.queueSong);
 
@@ -109,7 +113,6 @@ class RadioService extends EventEmitter {
           client.send(message);
         } catch (error) {
           logger.error('Error broadcasting to client:', error);
-          // Remove problematic client
           this.wsClients.delete(client);
         }
       }
@@ -118,7 +121,6 @@ class RadioService extends EventEmitter {
 
   private async refreshTrackUrls(): Promise<void> {
     try {
-      // Refresh URLs for all tracks in queue
       const updatedQueue = await Promise.all(
         this.queueState.queue.map(async (track) => {
           const queueItem = await QueueModel.findByPk(track.id, {
@@ -126,20 +128,28 @@ class RadioService extends EventEmitter {
               {
                 model: SongModel,
                 as: 'queueSong',
+                required: true,
               },
               {
                 model: UserModel,
                 as: 'addedByUser',
+                required: true,
               },
             ],
           });
-          return queueItem ? await this.transformQueueItem(queueItem) : track;
+          return queueItem
+            ? await this.transformQueueItem(
+                queueItem as QueueModel & {
+                  queueSong: SongModel;
+                  addedByUser: UserModel;
+                }
+              )
+            : track;
         })
       );
 
       this.queueState.queue = updatedQueue;
 
-      // Refresh current track URL if exists
       if (this.queueState.currentTrack) {
         const currentQueueItem = await QueueModel.findByPk(
           this.queueState.currentTrack.id,
@@ -148,18 +158,24 @@ class RadioService extends EventEmitter {
               {
                 model: SongModel,
                 as: 'queueSong',
+                required: true,
               },
               {
                 model: UserModel,
                 as: 'addedByUser',
+                required: true,
               },
             ],
           }
         );
 
         if (currentQueueItem) {
-          this.queueState.currentTrack =
-            await this.transformQueueItem(currentQueueItem);
+          this.queueState.currentTrack = await this.transformQueueItem(
+            currentQueueItem as QueueModel & {
+              queueSong: SongModel;
+              addedByUser: UserModel;
+            }
+          );
         }
       }
     } catch (error) {
@@ -176,26 +192,33 @@ class RadioService extends EventEmitter {
           {
             model: SongModel,
             as: 'queueSong',
+            required: true,
             attributes: ['id', 'title', 'artist', 'path', 'duration'],
           },
           {
             model: UserModel,
             as: 'addedByUser',
+            required: true,
             attributes: ['id', 'username'],
           },
         ],
       });
 
-      // Transform queue items with signed URLs
       this.queueState.queue = await Promise.all(
-        queueItems.map((item) => this.transformQueueItem(item))
+        queueItems.map((item) =>
+          this.transformQueueItem(
+            item as QueueModel & {
+              queueSong: SongModel;
+              addedByUser: UserModel;
+            }
+          )
+        )
       );
 
       if (this.queueState.queue.length > 0) {
         this.queueState.currentTrack = this.queueState.queue[0];
       }
 
-      // Start playback if radio is active
       if (this.queueState.isRadioActive) {
         this.startRadioPlayback();
       }
@@ -344,12 +367,13 @@ class RadioService extends EventEmitter {
         throw new Error('Song not found');
       }
 
-      const lastPosition = (await QueueModel.max('position')) || 0;
+      const lastPosition = (await QueueModel.max('position')) as number;
+      const newPosition = (lastPosition || 0) + 1;
 
       const queueItem = await QueueModel.create({
         songId,
         addedBy: userId,
-        position: lastPosition + 1,
+        position: newPosition,
       });
 
       const fullQueueItem = await QueueModel.findByPk(queueItem.id, {
@@ -357,15 +381,27 @@ class RadioService extends EventEmitter {
           {
             model: SongModel,
             as: 'queueSong',
+            required: true,
           },
           {
             model: UserModel,
             as: 'addedByUser',
+            required: true,
           },
         ],
       });
 
-      const newTrack = await this.transformQueueItem(fullQueueItem);
+      if (!fullQueueItem) {
+        throw new Error('Failed to create queue item');
+      }
+
+      const newTrack = await this.transformQueueItem(
+        fullQueueItem as QueueModel & {
+          queueSong: SongModel;
+          addedByUser: UserModel;
+        }
+      );
+
       this.queueState.queue.push(newTrack);
 
       this.broadcastUpdate({
@@ -379,7 +415,6 @@ class RadioService extends EventEmitter {
       throw error;
     }
   }
-
   public async removeFromQueue(
     queueId: string,
     userId: string

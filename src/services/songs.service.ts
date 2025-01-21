@@ -22,7 +22,7 @@ export class SongsService {
     for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
       try {
         return await operation();
-      } catch (error) {
+      } catch (error: any) {
         lastError = error as Error;
 
         if (
@@ -57,7 +57,7 @@ export class SongsService {
     });
   }
 
-  async createSong(songData: CreateSongDto): Promise<SongModel> {
+  async createSong(songData: any): Promise<SongModel> {
     return this.withRetry(async () => {
       const transaction = await sequelize.transaction();
 

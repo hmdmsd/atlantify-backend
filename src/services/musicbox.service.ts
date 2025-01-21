@@ -80,7 +80,6 @@ export class MusicBoxService {
 
       const { count, rows } = await SuggestionModel.findAndCountAll({
         where,
-        order,
         limit,
         offset,
         include: [
@@ -99,7 +98,6 @@ export class MusicBoxService {
 
       const suggestions = rows.map((suggestion) => ({
         ...suggestion.toJSON(),
-        hasVoted: suggestion.userVotes?.length > 0, // Changed from votes to userVotes
       }));
 
       return {
@@ -164,7 +162,6 @@ export class MusicBoxService {
       // });
       // if (hasVoted) return false;
 
-      suggestion.votes += 1;
       await suggestion.save();
 
       // Optional: Record the vote

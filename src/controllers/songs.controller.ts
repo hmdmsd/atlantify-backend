@@ -146,6 +146,7 @@ export class SongsController {
   async streamSong(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      
       const song = await this.songsService.getSongDetails(id);
 
       if (!song) {
