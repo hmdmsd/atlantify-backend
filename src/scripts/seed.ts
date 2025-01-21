@@ -5,20 +5,21 @@ import { UserModel } from '../models/user.model';
 import { SongModel } from '../models/song.model';
 import { QueueModel } from '../models/queue.model';
 import { SuggestionModel } from '../models/suggestion.model';
+import { VoteModel } from '../models/vote.model';
 
 async function seedDatabase() {
   try {
     // Sync database
-    await sequelize.sync({ force: true }); // This will drop existing tables
+    await sequelize.sync({ force: true }); // This will drop existing tables and recreate them
 
     // Create users
     const adminId = uuidv4();
     const userId1 = uuidv4();
     const userId2 = uuidv4();
 
-    const hashedPassword = await hash('password123', 10);
+    const hashedPassword = await hash('password', 10);
 
-    const users = await UserModel.bulkCreate([
+    await UserModel.bulkCreate([
       {
         id: adminId,
         username: 'admin',
@@ -43,9 +44,13 @@ async function seedDatabase() {
     ]);
 
     // Create songs
-    const songs = await SongModel.bulkCreate([
+    const song1Id = uuidv4();
+    const song2Id = uuidv4();
+    const song3Id = uuidv4();
+
+    await SongModel.bulkCreate([
       {
-        id: uuidv4(),
+        id: song1Id,
         title: 'Bohemian Rhapsody',
         artist: 'Queen',
         duration: 354,
@@ -54,7 +59,7 @@ async function seedDatabase() {
         size: 8400000,
       },
       {
-        id: uuidv4(),
+        id: song2Id,
         title: 'Hotel California',
         artist: 'Eagles',
         duration: 391,
@@ -63,7 +68,7 @@ async function seedDatabase() {
         size: 7800000,
       },
       {
-        id: uuidv4(),
+        id: song3Id,
         title: 'Sweet Child O Mine',
         artist: 'Guns N Roses',
         duration: 356,
@@ -77,43 +82,63 @@ async function seedDatabase() {
     await QueueModel.bulkCreate([
       {
         id: uuidv4(),
-        songId: songs[0].id,
+        songId: song1Id,
         addedBy: userId1,
         position: 1,
       },
       {
         id: uuidv4(),
-        songId: songs[1].id,
+        songId: song2Id,
         addedBy: userId2,
         position: 2,
       },
     ]);
 
     // Create suggestions
+    const suggestion1Id = uuidv4();
+    const suggestion2Id = uuidv4();
+    const suggestion3Id = uuidv4();
+
     await SuggestionModel.bulkCreate([
       {
-        id: uuidv4(),
+        id: suggestion1Id,
         title: 'Stairway to Heaven',
         artist: 'Led Zeppelin',
         suggestedBy: userId1,
-        votes: 5,
+        voteCount: 5,
         status: 'pending',
       },
       {
-        id: uuidv4(),
+        id: suggestion2Id,
         title: 'Sweet Home Alabama',
         artist: 'Lynyrd Skynyrd',
         suggestedBy: userId2,
-        votes: 3,
+        voteCount: 3,
         status: 'approved',
       },
       {
-        id: uuidv4(),
+        id: suggestion3Id,
         title: 'November Rain',
         artist: 'Guns N Roses',
         suggestedBy: userId2,
-        votes: 1,
+        voteCount: 1,
         status: 'rejected',
+      },
+    ]);
+
+    // Create votes
+    await VoteModel.bulkCreate([
+      {
+        suggestionId: suggestion1Id,
+        userId: userId1,
+      },
+      {
+        suggestionId: suggestion1Id,
+        userId: userId2,
+      },
+      {
+        suggestionId: suggestion2Id,
+        userId: userId1,
       },
     ]);
 
