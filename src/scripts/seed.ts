@@ -13,8 +13,28 @@ import { SongStatsModel } from '../models/song-stats.model';
 
 async function seedDatabase() {
   try {
-    // Sync database
-    await sequelize.sync({ force: true }); // This will drop existing tables and recreate them
+    // First, disable foreign key constraints
+    await sequelize.query('PRAGMA foreign_keys = OFF;');
+
+    // Drop tables in reverse order of dependencies
+    await Promise.all([
+      VoteModel.drop(),
+      QueueModel.drop(),
+      PlaylistSongModel.drop(),
+      LikedSongModel.drop(),
+      SongStatsModel.drop(),
+    ]);
+
+    await Promise.all([SuggestionModel.drop(), PlaylistModel.drop()]);
+
+    await SongModel.drop();
+    await UserModel.drop();
+
+    // Re-enable foreign key constraints
+    await sequelize.query('PRAGMA foreign_keys = ON;');
+
+    // Sync all tables
+    await sequelize.sync({ force: true });
 
     // Create users
     const adminId = uuidv4();
@@ -46,7 +66,6 @@ async function seedDatabase() {
         role: 'user',
       },
     ]);
-
     // Song metadata
     const songsMetadata = [
       {
@@ -158,68 +177,13 @@ async function seedDatabase() {
           duration: song.duration,
           path: `songs/${song.filename}`,
           uploadedBy: adminId,
-          size: Math.floor(Math.random() * 5000000) + 3000000, // Random size between 3-8MB
+          size: Math.floor(Math.random() * 5000000) + 3000000,
         });
         return { id: songId, ...song };
       })
     );
 
-    // Create song stats for each song
-    await Promise.all(
-      songRecords.map((song) =>
-        SongStatsModel.create({
-          id: uuidv4(),
-          songId: song.id,
-          playCount: Math.floor(Math.random() * 100),
-          lastPlayedAt: new Date(),
-        })
-      )
-    );
-
-    // Create some liked songs
-    await Promise.all(
-      songRecords.slice(0, 5).map((song) =>
-        LikedSongModel.create({
-          id: uuidv4(),
-          userId: userId1,
-          songId: song.id,
-        })
-      )
-    );
-
-    // Create playlists
-    const playlist1Id = uuidv4();
-    const playlist2Id = uuidv4();
-
-    await PlaylistModel.bulkCreate([
-      {
-        id: playlist1Id,
-        name: 'My Favorites',
-        description: 'Collection of my favorite songs',
-        createdBy: userId1,
-      },
-      {
-        id: playlist2Id,
-        name: 'Chill Vibes',
-        description: 'Perfect for relaxing',
-        createdBy: userId2,
-      },
-    ]);
-
-    // Add songs to playlists
-    await Promise.all(
-      songRecords.slice(0, 4).map((song, index) =>
-        PlaylistSongModel.create({
-          id: uuidv4(),
-          playlistId: playlist1Id,
-          songId: song.id,
-          position: index + 1,
-          addedBy: userId1,
-        })
-      )
-    );
-
-    // Create queue items (using the first two songs)
+    // Create queue items
     await QueueModel.bulkCreate([
       {
         id: uuidv4(),

@@ -751,3 +751,6 @@
 2025-01-21T14:30:47.404Z [ERROR]: S3 Upload Error: Inaccessible host: `garage.deuxfleurs.fr' at port `undefined'. This service may not be available in the `garage' region.
 2025-01-21T14:30:47.406Z [ERROR]: Error uploading song: Inaccessible host: `garage.deuxfleurs.fr' at port `undefined'. This service may not be available in the `garage' region.
 2025-01-22T00:44:40.259Z [ERROR]: Error incrementing play count: SQLITE_CONSTRAINT: FOREIGN KEY constraint failed
+2025-01-22T12:33:12.985Z [ERROR]: Error creating playlist: User not found
+2025-01-22T12:35:35.289Z [ERROR]: Error creating playlist: User not found
+2025-01-22T12:36:03.719Z [ERROR]: Error creating playlist: SQLITE_CONSTRAINT: FOREIGN KEY constraint failed
