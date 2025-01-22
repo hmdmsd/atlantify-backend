@@ -73,7 +73,7 @@ export class PlaylistService {
                   'artist',
                   'duration',
                   'path',
-                  'publicUrl',
+                  'publicUrl', // Add these two fields
                 ],
               },
             ],
