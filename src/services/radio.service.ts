@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events';
-import { Op } from 'sequelize';
 import { QueueModel } from '../models/queue.model';
 import { SongModel } from '../models/song.model';
 import { UserModel } from '../models/user.model';

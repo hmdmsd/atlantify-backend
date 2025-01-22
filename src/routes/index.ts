@@ -1,17 +1,19 @@
 import { Router } from 'express';
-import authRouter from './auth.routes';
-import songsRouter from './songs.routes';
-import musicBoxRouter from './musicbox.routes';
+import authRoutes from './auth.routes';
+import musicBoxRoutes from './musicbox.routes';
+import radioRoutes from './radio.routes';
+import songsRoutes from './songs.routes';
 import playlistRouter from './playlist.routes';
 import likedSongsRouter from './liked-songs.routes';
 import songStatsRouter from './song-stats.routes';
 
 const router = Router();
 
-// Base API routes
-router.use('/auth', authRouter);
-router.use('/songs', songsRouter);
-router.use('/musicbox', musicBoxRouter);
+// Combine all routes
+router.use('/auth', authRoutes);
+router.use('/musicbox', musicBoxRoutes);
+router.use('/radio', radioRoutes);
+router.use('/songs', songsRoutes);
 router.use('/playlists', playlistRouter);
 router.use('/liked-songs', likedSongsRouter);
 router.use('/stats', songStatsRouter);
