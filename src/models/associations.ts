@@ -3,6 +3,10 @@ import { UserModel } from './user.model';
 import { QueueModel } from './queue.model';
 import { SuggestionModel } from './suggestion.model';
 import { VoteModel } from './vote.model';
+import { PlaylistModel } from './playlist.model';
+import { PlaylistSongModel } from './playlist-song.model';
+import { LikedSongModel } from './liked-song.model';
+import { SongStatsModel } from './song-stats.model';
 
 export function initializeAssociations() {
   // User associations
@@ -16,13 +20,22 @@ export function initializeAssociations() {
     as: 'votes',
   });
 
-  // Queue-specific user associations
+  UserModel.hasMany(LikedSongModel, {
+    foreignKey: 'userId',
+    as: 'likedSongs',
+  });
+
+  UserModel.hasMany(PlaylistModel, {
+    foreignKey: 'createdBy',
+    as: 'playlists',
+  });
+
+  // Queue associations
   UserModel.hasMany(QueueModel, {
     foreignKey: 'addedBy',
     as: 'queuedItems',
   });
 
-  // Queue associations
   QueueModel.belongsTo(UserModel, {
     foreignKey: 'addedBy',
     as: 'addedByUser',
@@ -37,6 +50,64 @@ export function initializeAssociations() {
   SongModel.hasMany(QueueModel, {
     foreignKey: 'songId',
     as: 'queueEntries',
+  });
+
+  SongModel.hasMany(LikedSongModel, {
+    foreignKey: 'songId',
+    as: 'likedBy',
+  });
+
+  SongModel.hasMany(PlaylistSongModel, {
+    foreignKey: 'songId',
+    as: 'inPlaylists',
+  });
+
+  SongModel.hasOne(SongStatsModel, {
+    foreignKey: 'songId',
+    as: 'stats',
+  });
+
+  // Playlist associations
+  PlaylistModel.belongsTo(UserModel, {
+    foreignKey: 'createdBy',
+    as: 'creator',
+  });
+
+  PlaylistModel.hasMany(PlaylistSongModel, {
+    foreignKey: 'playlistId',
+    as: 'songs',
+  });
+
+  PlaylistSongModel.belongsTo(PlaylistModel, {
+    foreignKey: 'playlistId',
+    as: 'playlist',
+  });
+
+  PlaylistSongModel.belongsTo(SongModel, {
+    foreignKey: 'songId',
+    as: 'song',
+  });
+
+  PlaylistSongModel.belongsTo(UserModel, {
+    foreignKey: 'addedBy',
+    as: 'addedByUser',
+  });
+
+  // Liked Songs associations
+  LikedSongModel.belongsTo(UserModel, {
+    foreignKey: 'userId',
+    as: 'user',
+  });
+
+  LikedSongModel.belongsTo(SongModel, {
+    foreignKey: 'songId',
+    as: 'song',
+  });
+
+  // Song Stats associations
+  SongStatsModel.belongsTo(SongModel, {
+    foreignKey: 'songId',
+    as: 'song',
   });
 
   // Suggestion associations
