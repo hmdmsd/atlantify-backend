@@ -6,6 +6,10 @@ import { SongModel } from '../models/song.model';
 import { QueueModel } from '../models/queue.model';
 import { SuggestionModel } from '../models/suggestion.model';
 import { VoteModel } from '../models/vote.model';
+import { PlaylistModel } from '../models/playlist.model';
+import { PlaylistSongModel } from '../models/playlist-song.model';
+import { LikedSongModel } from '../models/liked-song.model';
+import { SongStatsModel } from '../models/song-stats.model';
 
 async function seedDatabase() {
   try {
@@ -43,42 +47,189 @@ async function seedDatabase() {
       },
     ]);
 
-    // Create songs
-    const song1Id = uuidv4();
-    const song2Id = uuidv4();
-
-    await SongModel.bulkCreate([
+    // Song metadata
+    const songsMetadata = [
       {
-        id: song1Id,
-        title: 'starboy',
-        artist: 'the weekend',
-        duration: 354,
-        path: 'songs/the-weekend-starboy.mp3',
-        uploadedBy: adminId,
-        size: 8400000,
+        title: 'A La Noss Elil',
+        artist: 'Unknown',
+        filename: 'a-l-a-noss-elil.mp3',
+        duration: 320,
       },
       {
-        id: song2Id,
-        title: 'a sky full of stars',
-        artist: 'coldplay',
-        duration: 391,
-        path: 'songs/coldplay-a-sky-full-of-stars.mp3',
-        uploadedBy: adminId,
-        size: 7800000,
+        title: 'If We Have Each Other',
+        artist: 'Alec Benjamin',
+        filename: 'alec-benjamin-if-we-have-each-other.mp3',
+        duration: 187,
+      },
+      {
+        title: 'Sigma Boy',
+        artist: 'Betsy Sigma',
+        filename: 'betsy-sigma-sigma-boy.mp3',
+        duration: 195,
+      },
+      {
+        title: 'Hope',
+        artist: 'The Chainsmokers',
+        filename: 'chainsmokers-hope.mp3',
+        duration: 213,
+      },
+      {
+        title: 'A Sky Full of Stars',
+        artist: 'Coldplay',
+        filename: 'coldplay-a-sky-full-of-stars.mp3',
+        duration: 267,
+      },
+      {
+        title: 'Sun',
+        artist: 'Derik Fein',
+        filename: 'derik-fein-sun.mp3',
+        duration: 231,
+      },
+      {
+        title: "I Wouldn't Mind",
+        artist: 'He Is We',
+        filename: 'he-is-we-i-wouldn-t-mind.mp3',
+        duration: 240,
+      },
+      {
+        title: 'Netfakarna Sghar',
+        artist: 'Kaso',
+        filename: 'kaso-netfakarna-sghar.mp3',
+        duration: 285,
+      },
+      {
+        title: 'Sada9tha',
+        artist: 'Kaso',
+        filename: 'kaso-sada9tha.mp3',
+        duration: 256,
+      },
+      {
+        title: "Don't Worry",
+        artist: 'Madcon',
+        filename: 'madcon-don-t-worry.mp3',
+        duration: 199,
+      },
+      {
+        title: 'Ya Lil',
+        artist: 'Mortadha Ftiti',
+        filename: 'mortadha-ftiti-ya-lil.mp3',
+        duration: 274,
+      },
+      {
+        title: 'Stacy',
+        artist: 'Quinn XCII',
+        filename: 'quinn-xcii-stacy.mp3',
+        duration: 218,
+      },
+      {
+        title: "It Ain't Me",
+        artist: 'Selena Gomez',
+        filename: 'selena-gomez-it-ain-t-me.mp3',
+        duration: 220,
+      },
+      {
+        title: 'Starboy',
+        artist: 'The Weeknd',
+        filename: 'the-weekend-starboy.mp3',
+        duration: 230,
+      },
+      {
+        title: 'Blinding Lights',
+        artist: 'The Weeknd',
+        filename: 'the-weeknd-blinding-lights.mp3',
+        duration: 203,
+      },
+      {
+        title: 'Push 2 Start',
+        artist: 'Tyla',
+        filename: 'tyla-push-2-start.mp3',
+        duration: 189,
+      },
+    ];
+
+    // Create songs
+    const songRecords = await Promise.all(
+      songsMetadata.map(async (song) => {
+        const songId = uuidv4();
+        await SongModel.create({
+          id: songId,
+          title: song.title,
+          artist: song.artist,
+          duration: song.duration,
+          path: `songs/${song.filename}`,
+          uploadedBy: adminId,
+          size: Math.floor(Math.random() * 5000000) + 3000000, // Random size between 3-8MB
+        });
+        return { id: songId, ...song };
+      })
+    );
+
+    // Create song stats for each song
+    await Promise.all(
+      songRecords.map((song) =>
+        SongStatsModel.create({
+          id: uuidv4(),
+          songId: song.id,
+          playCount: Math.floor(Math.random() * 100),
+          lastPlayedAt: new Date(),
+        })
+      )
+    );
+
+    // Create some liked songs
+    await Promise.all(
+      songRecords.slice(0, 5).map((song) =>
+        LikedSongModel.create({
+          id: uuidv4(),
+          userId: userId1,
+          songId: song.id,
+        })
+      )
+    );
+
+    // Create playlists
+    const playlist1Id = uuidv4();
+    const playlist2Id = uuidv4();
+
+    await PlaylistModel.bulkCreate([
+      {
+        id: playlist1Id,
+        name: 'My Favorites',
+        description: 'Collection of my favorite songs',
+        createdBy: userId1,
+      },
+      {
+        id: playlist2Id,
+        name: 'Chill Vibes',
+        description: 'Perfect for relaxing',
+        createdBy: userId2,
       },
     ]);
 
-    // Create queue items
+    // Add songs to playlists
+    await Promise.all(
+      songRecords.slice(0, 4).map((song, index) =>
+        PlaylistSongModel.create({
+          id: uuidv4(),
+          playlistId: playlist1Id,
+          songId: song.id,
+          position: index + 1,
+          addedBy: userId1,
+        })
+      )
+    );
+
+    // Create queue items (using the first two songs)
     await QueueModel.bulkCreate([
       {
         id: uuidv4(),
-        songId: song1Id,
+        songId: songRecords[0].id,
         addedBy: userId1,
         position: 1,
       },
       {
         id: uuidv4(),
-        songId: song2Id,
+        songId: songRecords[1].id,
         addedBy: userId2,
         position: 2,
       },
