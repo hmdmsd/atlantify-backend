@@ -35,5 +35,6 @@ router.post(
 );
 router.get('/:id', (req, res) => songsController.getSongDetails(req, res));
 router.delete('/:id', (req, res) => songsController.deleteSong(req, res));
+router.put('/:id', (req, res) => songsController.incrementViews(req, res));
 
 export default router;

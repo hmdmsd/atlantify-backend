@@ -72,6 +72,27 @@ export class SongsService {
       }
     });
   }
+  async incrementViews(songId: string): Promise<void> {
+
+    return this.withRetry(async () => {
+      const song = await SongModel.findByPk(songId, {
+        lock: Transaction.LOCK.UPDATE,
+      });
+      
+      if (!song) {
+        throw new Error('Song not found');
+      }
+  
+      // Ajout d'un log ici
+      console.log(`Incrementing views for song ID: ${songId}`);
+  
+      song.views += 1;
+      await song.save();
+    });
+  }
+  
+  
+  
 
   async getSongDetails(songId: string): Promise<SongModel | null> {
     return this.withRetry(async () => {

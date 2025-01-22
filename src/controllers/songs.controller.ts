@@ -15,8 +15,20 @@ export class SongsController {
     this.s3Service = new S3Service();
   }
 
+  async incrementViews(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+    try {
+      await this.songsService.incrementViews(id);
+      res.json({ success: true });
+    } catch (error) {
+      logger.error('Error incrementing views:', error);
+      res.status(500).json({ success: false, message: 'Failed to increment views' });
+    }
+  }
+
   async listSongs(req: Request, res: Response): Promise<void> {
     try {
+      
       const songs = await this.songsService.listSongs();
 
       // Get signed URLs for all songs
@@ -103,7 +115,7 @@ export class SongsController {
 
       // Calculate duration
       const duration = this.estimateDuration(file.size);
-
+      
       // Create song entry in database
       const song = await this.songsService.createSong({
         title,
@@ -112,6 +124,7 @@ export class SongsController {
         size: file.size,
         duration,
         uploadedBy: userId,
+        views:0,
       });
 
       // Get signed URL
@@ -142,13 +155,21 @@ export class SongsController {
       });
     }
   }
+  
 
   async streamSong(req: Request, res: Response): Promise<void> {
+    console.log('streamSong');
     try {
-      const { id } = req.params;
-      
-      const song = await this.songsService.getSongDetails(id);
 
+      const { id } = req.params;
+  
+      const song = await this.songsService.getSongDetails(id);
+      // Increment the song views
+      
+        await this.songsService.incrementViews(id);
+        res.json({ success: true });
+      
+  
       if (!song) {
         res.status(404).json({
           success: false,
@@ -156,10 +177,12 @@ export class SongsController {
         });
         return;
       }
-
+  
+      
+  
       // Get a signed URL for the song
       const signedUrl = await this.s3Service.getSignedUrl(song.path);
-
+  
       // Redirect to the signed URL
       res.redirect(signedUrl);
     } catch (error) {
@@ -170,6 +193,7 @@ export class SongsController {
       });
     }
   }
+  
 
   private estimateDuration(fileSize: number): number {
     const estimatedDurationInSeconds = Math.round(

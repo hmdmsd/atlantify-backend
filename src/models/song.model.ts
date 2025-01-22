@@ -12,6 +12,7 @@ export class SongModel extends Model {
   public uploadedBy!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+  public views! : number;
 }
 
 SongModel.init(
@@ -37,6 +38,11 @@ SongModel.init(
     publicUrl: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    views: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
     size: {
       type: DataTypes.INTEGER,
